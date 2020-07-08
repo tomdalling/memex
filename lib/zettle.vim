@@ -1,4 +1,4 @@
-set wrap
+set nowrap
 set textwidth=80
 
 let s:zettle_cmd = "../bin/zettle.rb"
