@@ -25,6 +25,12 @@ module Zettle
     path(identifier).exist?
   end
 
+  def title(identifier)
+    path(identifier).open(mode: 'r') do |f|
+      return f.gets.strip.delete_prefix("# ").strip
+    end
+  end
+
   def path(identifier)
     ZETTLE_DIR.join(identifier).sub_ext(".md")
   end
@@ -87,16 +93,13 @@ module Zettle::CLI
   end
 
   class List < Dry::CLI::Command
-    desc "Lists all zettles, showing id and heading, in grep format (for vim/fzf)"
+    desc "Lists zettles in tabular format"
 
-    def call
+    def call(**options)
       Zettle.each_id do |identifier|
-        f = Zettle.path(identifier).open(mode: 'r')
-        title = f.gets.strip
-        f.close
-
+        title = Zettle.title(identifier)
         path = Zettle.path(identifier).relative_path_from(Dir.pwd)
-        puts "#{path}:0: #{title}"
+        puts [path, identifier, title].join("\t")
       end
     end
   end
