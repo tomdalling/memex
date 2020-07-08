@@ -3,8 +3,9 @@ Zettle
 
 TODO:
 
+ - [ ] Ability to create new zettle within vim
  - [X] Command line FZF search to open zettle (ZettleOpen)
- - [X] Full text search (just use Rg)
+ - [ ] Full text search (just use Rg) (Rg not working?)
  - [X] Command to insert zettle link based on FZF
  - [ ] <ctrl-]> to follow zettle links
  - [ ] Search by hashtag
