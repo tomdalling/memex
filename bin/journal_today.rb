@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'pathname'
+require_relative '_bootstrap'
 
 NOW = Time.now
-JOURNAL_DIR = Pathname(__dir__) / ".." / "journal"
+JOURNAL_DIR = MEMEX_ROOT/"journal"
 JOURNAL_PATH = JOURNAL_DIR / NOW.strftime('%F.md')
-VIMRC_PATH = JOURNAL_DIR / 'vimrc'
+VIMRC_PATH = MEMEX_ROOT/'lib/journal.vim'
 
 title = NOW.strftime('%A, %-d %B %Y')
 template = <<~END_TEMPLATE

@@ -6,7 +6,9 @@ module Zettle
   extend self
 
   IDENTIFIER_CHARS = ('a'..'z').to_a + ('0'..'9').to_a
-  ZETTLE_DIR = Pathname(__dir__) / "../zettle"
+  ZETTLE_DIR = MEMEX_ROOT/"zettle"
+  HASHTAG_REGEX = /#[a-z0-9_-]+/
+  ZETTLE_VIM_PATH = MEMEX_ROOT/"lib/zettle.vim"
 
   def new_identifier
     loop do
@@ -26,6 +28,22 @@ module Zettle
   def path(identifier)
     ZETTLE_DIR.join(identifier).sub_ext(".md")
   end
+
+  def each_id
+    ZETTLE_DIR.each_child do |path|
+      yield path.basename(".*") if path.extname == ".md"
+    end
+  end
+
+  def run_editor(*args)
+    args.map! { _1.is_a?(Pathname) ? _1.to_path : _1 }
+    system(
+      ENV.fetch("EDITOR"),
+      '-S', ZETTLE_VIM_PATH.to_path,
+      *args,
+      chdir: ZETTLE_DIR.to_path,
+    )
+  end
 end
 
 
@@ -34,16 +52,24 @@ module Zettle::CLI
 
   class New < Dry::CLI::Command
     desc "Creates a new zettle file and opens it for editing"
+    example '"Pathname is good #ruby"'
+    example 'Pathname is good "#ruby"'
 
-    def call
-      path = Zettle.new_path
+    def call(args:)
+      title = args.join(' ')
+      hashtags = ["#unprocessed"] + title.scan(Zettle::HASHTAG_REGEX)
+      title = title.gsub(Zettle::HASHTAG_REGEX, "").strip.gsub(/\s+/, " ")
       template = <<~END_TEMPLATE
-        # Title goes here
-        Tags: #unprocessed
+        # #{title}
+        Tags: #{hashtags.join(' ')}
+
+
       END_TEMPLATE
+
+      path = Zettle.new_path
       path.write(template, mode: 'wx') # never overwrites
 
-      system(ENV.fetch("EDITOR"), path.to_path)
+      Zettle.run_editor('-c', 'normal G$', '--', path)
 
       if path.read.strip == template.strip
         puts "Deleting new zettle due to being empty"
@@ -52,7 +78,32 @@ module Zettle::CLI
     end
   end
 
+  class Open < Dry::CLI::Command
+    desc "Starts vim with :ZettleOpen"
+
+    def call
+      Zettle.run_editor('-c', 'ZettleOpen!')
+    end
+  end
+
+  class List < Dry::CLI::Command
+    desc "Lists all zettles, showing id and heading, in grep format (for vim/fzf)"
+
+    def call
+      Zettle.each_id do |identifier|
+        f = Zettle.path(identifier).open(mode: 'r')
+        title = f.gets.strip
+        f.close
+
+        path = Zettle.path(identifier).relative_path_from(Dir.pwd)
+        puts "#{path}:0: #{title}"
+      end
+    end
+  end
+
   register "new", New
+  register "open", Open
+  register "list", List
 end
 
 
