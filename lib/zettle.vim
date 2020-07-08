@@ -46,3 +46,4 @@ command! -bang ZettleOpen call fzf#vim#grep(
 
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()
+nnoremap <leader>. :ZettleOpen<cr>
