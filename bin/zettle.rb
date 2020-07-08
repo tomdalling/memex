@@ -61,7 +61,7 @@ module Zettle::CLI
     example '"Pathname is good #ruby"'
     example 'Pathname is good "#ruby"'
 
-    def call(args:)
+    def call(args: [])
       title = args.join(' ')
       hashtags = ["#unprocessed"] + title.scan(Zettle::HASHTAG_REGEX)
       title = title.gsub(Zettle::HASHTAG_REGEX, "").strip.gsub(/\s+/, " ")
