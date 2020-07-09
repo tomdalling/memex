@@ -46,6 +46,18 @@ function! s:zettle_grep(qargs, bang)
   call fzf#vim#grep(l:cmd, 1, fzf#vim#with_preview(), a:bang)
 endfunction
 
+function! s:zettle_tag(tag)
+  let l:match = matchlist(a:tag, '\v\[\[([a-zA-Z0-9_-]{3})\]\]')
+  if l:match == []
+    " try do default behaviour of c-]
+    exe 'tag' a:tag
+  else
+    let l:fname = l:match[1] . '.md'
+    write
+    execute 'edit' l:fname
+  endif
+endfunction
+
 function! s:complete_link()
   let l:pos = getpos('.')
   let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), "[^ \t]*$")
@@ -66,7 +78,9 @@ endfunction
 command! -bang ZettleOpen call <sid>zettle_open(<bang>0)
 command! -nargs=* ZettleNew call <sid>zettle_new(<q-args>)
 command! -bang -nargs=* ZettleGrep call <sid>zettle_grep(<q-args>, <bang>0)
+command! -nargs=1 ZettleTag call <sid>zettle_tag(<q-args>)
 
+nnoremap <leader>. :ZettleOpen<cr>
+nnoremap <C-]> :exe 'ZettleTag' expand("<cWORD>")<cr>
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()
-nnoremap <leader>. :ZettleOpen<cr>
