@@ -1,18 +1,46 @@
+Memex
+=====
+
+This is a work-in-progress personal project. I might write about it if it
+actually works for me. Time will tell.
+
+
 Zettle
 ------
 
-TODO:
+From Vim:
 
- - [X] Ability to create new zettle within vim
- - [X] Command line FZF search to open zettle (ZettleOpen)
- - [X] Full text search (ZettleGrep) (normal Rg won't work due to .gitignore)
- - [X] Command to insert zettle link based on FZF
- - [X] Vim config for text editing (wrapping, etc.)
- - [X] <ctrl-]> to follow zettle links
+ - [X] ZettleNew: Create new zettle
+ - [X] ZettleOpen: Fuzzy find zettle based on title
+ - [X] ZettleGrep: Full text search for zettles
+ - [X] Tab-based zettle link autocompletion
+ - [X] Vim config tailored for text editing (wrapping, etc.)
+ - [X] ZettleTag or <ctrl-]>: jump to zettle from link
  - [X] Syntax highlighting for links
  - [X] Syntax highlighting for hashtags
- - [X] Make zettle cmd for outside of memex (mounts memex)
  - [ ] Search by hashtag
  - [ ] Search by absence of hashtag
- - [ ] Find and replace for tags
  - [ ] ZettleOpenRecent (like FZFMru)
+
+From command line:
+
+ - [X] bin/zettle.rb new: Create and edit new zettle
+ - [X] Auto-delete new zettles that haven't been edited
+ - [X] bin/zettle.rb open: Open vim ready to fuzzy find zettle
+ - [ ] Find and replace for hashtags
+
+Journal
+-------
+
+ - [X] CLI for opening today's journal, creating the file if needed
+ - [X] CLI for opening yesterday's journal, creating the file if needed
+ - [X] Auto-delete new files if they haven't been edited
+ - [X] Vim config tailored for text editing (wrapping, etc.)
+
+Memex
+-----
+
+ - [X] CLI for mounting volume
+ - [X] CLI for ejecting volume
+ - [X] CLI as shortcut for mounting, running script, then ejecting
+
