@@ -20,6 +20,32 @@ function! s:zettle_new(title)
   execute 'edit' l:path
 endfunction
 
+function! s:zettle_open(bang)
+  let l:cmd = s:zettle_cmd . ' list'
+  " NB: the 'placeholder' option is undocumented. It's the "{}" part of the
+  " preview command on the FZF command line
+  let l:options = fzf#vim#with_preview({
+    \ 'options': ['--delimiter=\\t', '--with-nth=2,3'],
+    \ 'placeholder': '{1}',
+    \ 'sink': function('s:edit_list_item'),
+    \ })
+  call fzf#vim#grep(l:cmd, 0, l:options, a:bang)
+endfunction
+
+function! s:zettle_grep(qargs, bang)
+  let l:cmd_args = [
+    \'rg',
+    \'--no-ignore-vcs',
+    \'--smart-case',
+    \'--column',
+    \'--line-number',
+    \'--no-heading',
+    \'--color=always',
+    \]
+  let l:cmd = join(l:cmd_args, " ") . " " . shellescape(a:qargs)
+  call fzf#vim#grep(l:cmd, 1, fzf#vim#with_preview(), a:bang)
+endfunction
+
 function! s:complete_link()
   let l:pos = getpos('.')
   let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), "[^ \t]*$")
@@ -37,20 +63,9 @@ function! s:complete_link()
   endif
 endfunction
 
-" NB: the 'placeholder' option is undocumented. It's the "{}" part of the
-" preview command
-command! -bang ZettleOpen call fzf#vim#grep(
-  \ s:zettle_cmd . ' list',
-  \ 0,
-  \ fzf#vim#with_preview({
-    \ 'options': ['--delimiter=\\t', '--with-nth=2,3'],
-    \ 'placeholder': '{1}',
-    \ 'sink': function('<sid>edit_list_item'),
-    \ }),
-  \ <bang>0
-  \ )
-
+command! -bang ZettleOpen call <sid>zettle_open(<bang>0)
 command! -nargs=* ZettleNew call <sid>zettle_new(<q-args>)
+command! -bang -nargs=* ZettleGrep call <sid>zettle_grep(<q-args>, <bang>0)
 
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()
