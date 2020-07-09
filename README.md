@@ -9,8 +9,10 @@ TODO:
  - [X] Command to insert zettle link based on FZF
  - [X] Vim config for text editing (wrapping, etc.)
  - [X] <ctrl-]> to follow zettle links
+ - [X] Syntax highlighting for links
+ - [X] Syntax highlighting for hashtags
+ - [ ] Make zettle cmd for outside of memex (mounts memex)
  - [ ] Search by hashtag
  - [ ] Search by absence of hashtag
- - [ ] Syntax highlighting for hashtags
  - [ ] Find and replace for tags
- - [ ] Make zettle cmd for outside of memex (mounts memex)
+ - [ ] ZettleOpenRecent (like FZFMru)
