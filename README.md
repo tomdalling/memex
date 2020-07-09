@@ -11,7 +11,7 @@ TODO:
  - [X] <ctrl-]> to follow zettle links
  - [X] Syntax highlighting for links
  - [X] Syntax highlighting for hashtags
- - [ ] Make zettle cmd for outside of memex (mounts memex)
+ - [X] Make zettle cmd for outside of memex (mounts memex)
  - [ ] Search by hashtag
  - [ ] Search by absence of hashtag
  - [ ] Find and replace for tags

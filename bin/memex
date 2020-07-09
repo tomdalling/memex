@@ -1,0 +1,83 @@
+#!/bin/bash
+set -ueo pipefail
+IFS=$'\n\t'
+
+PROG_NAME=$(basename $0)
+BUNDLE_PATH="$HOME/Dropbox/memex.sparsebundle"
+VOLUME_PATH="/Volumes/Memex"
+CHRUBY_SCRIPT="/usr/local/share/chruby/chruby.sh"
+
+sub_help(){
+  # Use this script for accessing binaries inside the memex
+    echo "Usage: $PROG_NAME <subcommand> [options]"
+    echo ""
+    echo "Take this script out of the memex volume and put it in your path. It"
+    echo "will mount/eject the volume for you. Also add aliases like:"
+    echo ""
+    echo "    alias journal='memex run journal'"
+    echo "    alias zettle='memex run zettle'"
+    echo ""
+    echo "Subcommands:"
+    echo "    mount"
+    echo "        Mounts the memex volume"
+    echo "    eject"
+    echo "        Unmounts the memex volume"
+    echo "    run <script> <args...>"
+    echo "        Mounts the memex volume, runs a script inside, and ejects the"
+    echo "        volume after the script is finished. Does not eject if the"
+    echo "        volume was already mounted."
+    echo ""
+}
+
+sub_mount(){
+  echo "hdiutil attach \"$BUNDLE_PATH\""
+  hdiutil attach "$BUNDLE_PATH"
+  echo "Mounted memex volume at $VOLUME_PATH"
+}
+
+sub_eject(){
+  cd "$HOME"
+  hdiutil detach "$(hdiutil info | grep "${VOLUME_PATH}" | cut -d$'\t' -f 1)"
+  echo "Ejected memex volume at $VOLUME_PATH"
+}
+
+sub_run(){
+  if [ ! -d "$VOLUME_PATH" ] ; then
+    did_mount="true"
+    sub_mount
+  fi
+
+  cd "$VOLUME_PATH"
+
+  if [[ -r "$CHRUBY_SCRIPT" ]] ; then
+    set +u # these scripts don't work in -u mode
+    source "$CHRUBY_SCRIPT"
+    chruby "$(cat .ruby-version)"
+    set -u
+  fi
+
+  script=${1-none}
+  shift
+  echo "Running: bin/${script}.rb $@"
+  bin/${script}.rb $@
+
+  if [ "${did_mount-}" == true ] ; then
+    sub_eject
+  fi
+}
+
+subcommand=${1-}
+case $subcommand in
+    "" | "-h" | "--help")
+        sub_help
+        ;;
+    *)
+        shift
+        sub_${subcommand} $@
+        if [ $? = 127 ]; then
+            echo "Error: '$subcommand' is not a known subcommand." >&2
+            echo "       Run '$PROG_NAME --help' for a list of known subcommands." >&2
+            exit 1
+        fi
+        ;;
+esac
