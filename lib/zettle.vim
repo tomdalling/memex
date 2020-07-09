@@ -14,6 +14,12 @@ function! s:reduce_list_items_to_link(items)
   return l:id . ']] '
 endfunction
 
+function! s:zettle_new(title)
+  let l:title = (a:title == "" ? "" : shellescape(a:title))
+  let l:path = system(s:zettle_cmd . " new --then=print-path " . l:title)
+  execute 'edit' l:path
+endfunction
+
 function! s:complete_link()
   let l:pos = getpos('.')
   let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), "[^ \t]*$")
@@ -43,6 +49,8 @@ command! -bang ZettleOpen call fzf#vim#grep(
     \ }),
   \ <bang>0
   \ )
+
+command! -nargs=* ZettleNew call <sid>zettle_new(<q-args>)
 
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()

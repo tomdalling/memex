@@ -3,7 +3,7 @@ Zettle
 
 TODO:
 
- - [ ] Ability to create new zettle within vim
+ - [X] Ability to create new zettle within vim
  - [X] Command line FZF search to open zettle (ZettleOpen)
  - [ ] Full text search (just use Rg) (Rg not working?)
  - [X] Command to insert zettle link based on FZF

@@ -21,6 +21,21 @@ module Zettle
     path(new_identifier)
   end
 
+  def write_template(identifier, title: "Title goes here")
+    hashtags = ["#unprocessed"] + title.scan(HASHTAG_REGEX)
+    title = title.gsub(HASHTAG_REGEX, "").strip.gsub(/\s+/, " ")
+    template = <<~END_TEMPLATE
+      # #{title}
+      Tags: #{hashtags.join(' ')}
+
+
+    END_TEMPLATE
+
+    path(identifier).write(template, mode: 'wx') # never overwrites
+
+    template
+  end
+
   def exists?(identifier)
     path(identifier).exist?
   end
@@ -29,6 +44,14 @@ module Zettle
     path(identifier).open(mode: 'r') do |f|
       return f.gets.strip.delete_prefix("# ").strip
     end
+  end
+
+  def content(identifier)
+    path(identifier).read
+  end
+
+  def delete(identifier)
+    path(identifier).delete
   end
 
   def path(identifier)
@@ -58,30 +81,32 @@ module Zettle::CLI
 
   class New < Dry::CLI::Command
     desc "Creates a new zettle file and opens it for editing"
+    option :then, default: "edit", values: %w(edit print-path), desc: "What to do after creating the new zettle"
     example '"Pathname is good #ruby"'
     example 'Pathname is good "#ruby"'
 
-    def call(args: [])
-      title = args.join(' ')
-      hashtags = ["#unprocessed"] + title.scan(Zettle::HASHTAG_REGEX)
-      title = title.gsub(Zettle::HASHTAG_REGEX, "").strip.gsub(/\s+/, " ")
-      template = <<~END_TEMPLATE
-        # #{title}
-        Tags: #{hashtags.join(' ')}
+    def call(args: [], **options)
+      id = Zettle.new_identifier
+      title = args.empty? ? "Title goes here" : args.join(' ')
+      template = Zettle.write_template(id, title: title)
 
-
-      END_TEMPLATE
-
-      path = Zettle.new_path
-      path.write(template, mode: 'wx') # never overwrites
-
-      Zettle.run_editor('-c', 'normal G$', '--', path)
-
-      if path.read.strip == template.strip
-        puts "Deleting new zettle due to being empty"
-        path.delete
+      case options.fetch(:then)
+      when "edit" then run_editor(id, template)
+      when "print-path" then puts Zettle.path(id).to_path
+      else raise "Unknown --then option"
       end
     end
+
+    private
+
+      def run_editor(id, template)
+        Zettle.run_editor('-c', 'normal G$', '--', Zettle.path(id))
+
+        if Zettle.content(id).strip == template.strip
+          puts "Deleting new zettle due to being empty"
+          Zettle.delete(id)
+        end
+      end
   end
 
   class Open < Dry::CLI::Command
