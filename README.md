@@ -18,6 +18,11 @@ From Vim:
  - [X] ZettleTag or <ctrl-]>: jump to zettle from link
  - [X] Syntax highlighting for links
  - [X] Syntax highlighting for hashtags
+ - [ ] Store ZettleGrep results in the quickfix list
+ - [ ] Handle zero ZettleGrep results case (it's doing some weird error)
+ - [ ] Work out why `set nowrap` isn't being applied to markdown
+ - [ ] Get a better markdown syntax plugin
+ - [ ] Replace wiki [[tag]] syntax with normal markdown [links](abc.md)
  - [ ] Search by hashtag
  - [ ] Search by absence of hashtag
  - [ ] ZettleOpenRecent (like FZFMru)
@@ -28,6 +33,7 @@ From command line:
  - [X] Auto-delete new zettles that haven't been edited
  - [X] bin/zettle.rb open: Open vim ready to fuzzy find zettle
  - [ ] Find and replace for hashtags
+ - [ ] Auto commit changes to separate git repo that only holds zettles
 
 Journal
 -------
