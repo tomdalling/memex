@@ -135,4 +135,5 @@ module Zettle::CLI
 end
 
 
+ARGV << "open" if ARGV.empty?
 Dry::CLI.new(Zettle::CLI).call
