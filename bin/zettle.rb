@@ -28,6 +28,9 @@ module Zettle
       # #{title}
       Tags: #{hashtags.join(' ')}
 
+      Description goes here.
+
+      ## References
 
     END_TEMPLATE
 
