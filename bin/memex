@@ -15,7 +15,7 @@ sub_help(){
     echo "will mount/eject the volume for you. Also add aliases like:"
     echo ""
     echo "    alias journal='memex run journal'"
-    echo "    alias zettle='memex run zettle'"
+    echo "    alias zettel='memex run zettel'"
     echo ""
     echo "Subcommands:"
     echo "    mount"

@@ -1,7 +1,7 @@
 set nowrap
 set textwidth=80
 
-let s:zettle_cmd = "../bin/zettle.rb"
+let s:zettel_cmd = "../bin/zettel.rb"
 let s:link_regex = '\v\[\[([a-zA-Z0-9_-]{3})\]\]'
 
 function! s:edit_list_item(item)
@@ -15,14 +15,14 @@ function! s:reduce_list_items_to_link(items)
   return l:id . ']] '
 endfunction
 
-function! s:zettle_new(title)
+function! s:zettel_new(title)
   let l:title = (a:title == "" ? "" : shellescape(a:title))
-  let l:path = system(s:zettle_cmd . " new --then=print-path " . l:title)
+  let l:path = system(s:zettel_cmd . " new --then=print-path " . l:title)
   execute 'edit' l:path
 endfunction
 
-function! s:zettle_open(bang)
-  let l:cmd = s:zettle_cmd . ' list'
+function! s:zettel_open(bang)
+  let l:cmd = s:zettel_cmd . ' list'
   " NB: the 'placeholder' option is undocumented. It's the "{}" part of the
   " preview command on the FZF command line
   let l:options = fzf#vim#with_preview({
@@ -33,7 +33,7 @@ function! s:zettle_open(bang)
   call fzf#vim#grep(l:cmd, 0, l:options, a:bang)
 endfunction
 
-function! s:zettle_grep(qargs, bang)
+function! s:zettel_grep(qargs, bang)
   let l:cmd_args = [
     \'rg',
     \'--no-ignore-vcs',
@@ -47,7 +47,7 @@ function! s:zettle_grep(qargs, bang)
   call fzf#vim#grep(l:cmd, 1, fzf#vim#with_preview(), a:bang)
 endfunction
 
-function! s:zettle_tag(tag)
+function! s:zettel_tag(tag)
   let l:match = matchlist(a:tag, s:link_regex)
   if l:match == []
     " try do default behaviour of c-]
@@ -64,7 +64,7 @@ function! s:complete_link()
   let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), "[^ \t]*$")
   if l:prev_text == "[["
     return fzf#vim#complete(fzf#vim#with_preview({
-      \ 'source': s:zettle_cmd . ' list',
+      \ 'source': s:zettel_cmd . ' list',
       \ 'prefix': '',
       \ 'reducer': function('s:reduce_list_items_to_link'),
       \ 'options': ['--delimiter=\\t', '--with-nth=2,3'],
@@ -76,21 +76,21 @@ function! s:complete_link()
   endif
 endfunction
 
-command! -bang ZettleOpen call <sid>zettle_open(<bang>0)
-command! -nargs=* ZettleNew call <sid>zettle_new(<q-args>)
-command! -bang -nargs=* ZettleGrep call <sid>zettle_grep(<q-args>, <bang>0)
-command! -nargs=1 ZettleTag call <sid>zettle_tag(<q-args>)
+command! -bang ZettelOpen call <sid>zettel_open(<bang>0)
+command! -nargs=* ZettelNew call <sid>zettel_new(<q-args>)
+command! -bang -nargs=* ZettelGrep call <sid>zettel_grep(<q-args>, <bang>0)
+command! -nargs=1 ZettelTag call <sid>zettel_tag(<q-args>)
 
-nnoremap <leader>. :ZettleOpen<cr>
-nnoremap <C-]> :exe 'ZettleTag' expand("<cWORD>")<cr>
+nnoremap <leader>. :ZettelOpen<cr>
+nnoremap <C-]> :exe 'ZettelTag' expand("<cWORD>")<cr>
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()
 
 " syntax highlighting
 augroup ft_markdown
     autocmd!
-    exe "autocmd Syntax markdown syn match zettleLink '" . s:link_regex . "'"
-    autocmd Syntax markdown syn match zettleHashtag '#[a-z0-9-_]\+'
-    autocmd Syntax markdown hi def link zettleLink htmlLink
-    autocmd Syntax markdown hi def link zettleHashtag Type
+    exe "autocmd Syntax markdown syn match zettelLink '" . s:link_regex . "'"
+    autocmd Syntax markdown syn match zettelHashtag '#[a-z0-9-_]\+'
+    autocmd Syntax markdown hi def link zettelLink htmlLink
+    autocmd Syntax markdown hi def link zettelHashtag Type
 augroup end
