@@ -43,6 +43,17 @@ Journal
  - [X] Auto-delete new files if they haven't been edited
  - [X] Vim config tailored for text editing (wrapping, etc.)
 
+Wiki
+----
+
+ - TODO: a place to store info that does not suite a zettelkasten
+
+References
+----------
+
+ - TODO: links to, or copies of, external materials in an easy-to-reference
+   format
+
 Memex
 -----
 
