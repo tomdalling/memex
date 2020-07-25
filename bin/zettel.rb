@@ -113,10 +113,15 @@ module Zettel::CLI
   end
 
   class Open < Dry::CLI::Command
-    desc "Starts vim with :ZettelOpen"
+    desc "Starts vim inside the zettelkasten"
+    argument :zettel_id, desc: "The identifier of the zettel to open"
 
-    def call
-      Zettel.run_editor('-c', 'ZettelOpen!')
+    def call(zettel_id: nil, **)
+      if zettel_id
+        Zettel.run_editor("#{zettel_id}.md")
+      else
+        Zettel.run_editor('-c', 'ZettelOpen!')
+      end
     end
   end
 
