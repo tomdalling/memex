@@ -6,10 +6,8 @@ require 'date'
 module Journal
   extend self
 
-  DIR = MEMEX_ROOT/"journal"
-
   def edit_date(date)
-    path = DIR / date.strftime('%F.md')
+    path = Memex::JOURNAL_DIR / date.strftime('%F.md')
     title = date.strftime('%A, %-d %B %Y')
     template = <<~END_TEMPLATE
       #{title}
@@ -26,7 +24,7 @@ module Journal
       'nvim',
       '-c', 'normal G$',
       '--', path.to_path,
-      chdir: DIR,
+      chdir: Memex::JOURNAL_DIR,
     )
 
     if path.read.strip == template.strip

@@ -6,8 +6,6 @@ module Zettel
   extend self
 
   IDENTIFIER_CHARS = ('a'..'z').to_a + ('0'..'9').to_a
-  ZETTEL_DIR = MEMEX_ROOT/"zettel"
-  CONFIG_DIR = MEMEX_ROOT/"config"
   HASHTAG_REGEX = /#[a-z0-9_-]+/
 
   def new_identifier
@@ -58,21 +56,21 @@ module Zettel
   end
 
   def path(identifier)
-    ZETTEL_DIR.join(identifier).sub_ext(".md")
+    Memex::ZETTEL_DIR.join(identifier).sub_ext(".md")
   end
 
   def each_id
-    ZETTEL_DIR.each_child do |path|
+    Memex::ZETTEL_DIR.each_child do |path|
       yield path.basename(".*") if path.extname == ".md"
     end
   end
 
   def run_editor(*args)
     system(
-      { 'XDG_CONFIG_DIRS' => CONFIG_DIR.to_path },
+      { 'XDG_CONFIG_DIRS' => Memex::VIM_RUNTIME_DIR.to_path },
       ENV.fetch("EDITOR"),
       *args.map{ _1.is_a?(Pathname) ? _1.to_path : _1 },
-      chdir: ZETTEL_DIR.to_path,
+      chdir: Memex::ZETTEL_DIR.to_path,
     )
   end
 end
