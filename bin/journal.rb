@@ -7,7 +7,6 @@ module Journal
   extend self
 
   DIR = MEMEX_ROOT/"journal"
-  VIMRC_PATH = MEMEX_ROOT/'lib/journal.vim'
 
   def edit_date(date)
     path = DIR / date.strftime('%F.md')
@@ -26,7 +25,6 @@ module Journal
     system(
       'nvim',
       '-c', 'normal G$',
-      '-S', VIMRC_PATH.to_path,
       '--', path.to_path,
       chdir: DIR,
     )

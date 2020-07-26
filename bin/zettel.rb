@@ -7,8 +7,8 @@ module Zettel
 
   IDENTIFIER_CHARS = ('a'..'z').to_a + ('0'..'9').to_a
   ZETTEL_DIR = MEMEX_ROOT/"zettel"
+  CONFIG_DIR = MEMEX_ROOT/"config"
   HASHTAG_REGEX = /#[a-z0-9_-]+/
-  ZETTEL_VIM_PATH = MEMEX_ROOT/"lib/zettel.vim"
 
   def new_identifier
     loop do
@@ -68,11 +68,10 @@ module Zettel
   end
 
   def run_editor(*args)
-    args.map! { _1.is_a?(Pathname) ? _1.to_path : _1 }
     system(
+      { 'XDG_CONFIG_DIRS' => CONFIG_DIR.to_path },
       ENV.fetch("EDITOR"),
-      '-S', ZETTEL_VIM_PATH.to_path,
-      *args,
+      *args.map{ _1.is_a?(Pathname) ? _1.to_path : _1 },
       chdir: ZETTEL_DIR.to_path,
     )
   end
