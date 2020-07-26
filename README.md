@@ -15,7 +15,6 @@ From Vim:
  - [X] ZettelGrep: Full text search for zettels
  - [X] Tab-based zettel link autocompletion
  - [X] Vim config tailored for text editing (wrapping, etc.)
- - [X] ZettelJumpTo or <ctrl-]>: jump to zettel from link
  - [X] Syntax highlighting for links
  - [X] Syntax highlighting for hashtags
  - [ ] Store ZettelGrep results in the quickfix list
