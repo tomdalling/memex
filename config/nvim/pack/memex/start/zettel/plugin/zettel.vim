@@ -6,12 +6,6 @@ function! s:edit_list_item(item)
   execute 'edit' l:path
 endfunction
 
-function! s:reduce_list_items_to_link(items)
-  " only handles single item atm
-  let l:id = split(a:items[0])[1]
-  return l:id . ']] '
-endfunction
-
 function! s:zettel_new(title)
   let l:title = (a:title == "" ? "" : shellescape(a:title))
   let l:path = system(s:zettel_cmd . " new --then=print-path " . l:title)
@@ -47,7 +41,7 @@ endfunction
 function! s:complete_link()
   let l:pos = getpos('.')
   let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), "[^ \t]*$")
-  if l:prev_text == "[["
+  if l:prev_text == "["
     return fzf#vim#complete(fzf#vim#with_preview({
       \ 'source': s:zettel_cmd . ' list',
       \ 'prefix': '',
@@ -59,6 +53,17 @@ function! s:complete_link()
     " default behaviour of tab
     return VimCompletesMe#vim_completes_me(0)
   endif
+endfunction
+
+function! s:reduce_list_items_to_link(items)
+  " only handles single item atm
+  let l:zettel = s:parse_list_item(a:items[0])
+  return l:zettel.title . '](' . l:zettel.path . ')'
+endfunction
+
+function! s:parse_list_item(list_item)
+  let l:parts = split(a:list_item, '\t')
+  return { 'path': l:parts[0], 'id': l:parts[1], 'title': l:parts[2] }
 endfunction
 
 command! -bang ZettelOpen call <sid>zettel_open(<bang>0)
