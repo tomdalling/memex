@@ -2,7 +2,7 @@ set nowrap
 set textwidth=80
 
 let s:zettel_cmd = "../bin/zettel.rb"
-let s:link_regex = '\v\[\[([a-zA-Z0-9_-]{3})\]\]'
+let g:zettel#link_regex = '\v\[\[([a-zA-Z0-9_-]{3})\]\]'
 
 function! s:edit_list_item(item)
   let l:path = split(a:item)[0]
@@ -48,7 +48,7 @@ function! s:zettel_grep(qargs, bang)
 endfunction
 
 function! s:zettel_tag(tag)
-  let l:match = matchlist(a:tag, s:link_regex)
+  let l:match = matchlist(a:tag, g:zettel#link_regex)
   if l:match == []
     " try do default behaviour of c-]
     exe 'tag' a:tag
@@ -85,12 +85,3 @@ nnoremap <leader>. :ZettelOpen<cr>
 nnoremap <C-]> :exe 'ZettelTag' expand("<cWORD>")<cr>
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()
-
-" syntax highlighting
-augroup ft_markdown
-    autocmd!
-    exe "autocmd Syntax markdown syn match zettelLink '" . s:link_regex . "'"
-    autocmd Syntax markdown syn match zettelHashtag '#[a-z0-9-_]\+'
-    autocmd Syntax markdown hi def link zettelLink htmlLink
-    autocmd Syntax markdown hi def link zettelHashtag Type
-augroup end
