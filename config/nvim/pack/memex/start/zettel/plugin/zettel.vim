@@ -1,6 +1,3 @@
-set nowrap
-set textwidth=80
-
 let s:zettel_cmd = "../bin/zettel.rb"
 let g:zettel#link_regex = '\v\[\[([a-zA-Z0-9_-]{3})\]\]'
 
