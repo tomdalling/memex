@@ -4,12 +4,14 @@ GEM
     concurrent-ruby (1.1.6)
     dry-cli (0.6.0)
       concurrent-ruby (~> 1.0)
+    value_semantics (3.3.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   dry-cli
+  value_semantics
 
 BUNDLED WITH
    2.1.4
