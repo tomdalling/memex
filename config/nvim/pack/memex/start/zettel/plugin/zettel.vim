@@ -44,7 +44,7 @@ function! s:zettel_grep(qargs, bang)
   call fzf#vim#grep(l:cmd, 1, fzf#vim#with_preview(), a:bang)
 endfunction
 
-function! s:zettel_tag(tag)
+function! s:zettel_jump_to(tag)
   let l:match = matchlist(a:tag, g:zettel#link_regex)
   if l:match == []
     " try do default behaviour of c-]
@@ -76,9 +76,9 @@ endfunction
 command! -bang ZettelOpen call <sid>zettel_open(<bang>0)
 command! -nargs=* ZettelNew call <sid>zettel_new(<q-args>)
 command! -bang -nargs=* ZettelGrep call <sid>zettel_grep(<q-args>, <bang>0)
-command! -nargs=1 ZettelTag call <sid>zettel_tag(<q-args>)
+command! -nargs=1 ZettelJumpTo call <sid>zettel_jump_to(<q-args>)
 
 nnoremap <leader>. :ZettelOpen<cr>
-nnoremap <C-]> :exe 'ZettelTag' expand("<cWORD>")<cr>
+nnoremap <C-]> :exe 'ZettelJumpTo' expand("<cWORD>")<cr>
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()
