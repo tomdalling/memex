@@ -40,25 +40,37 @@ endfunction
 
 function! s:complete_link()
   let l:pos = getpos('.')
-  let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), "[^ \t]*$")
-  if l:prev_text == "["
+  let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), '\v[\[(]$')
+  let l:reducers = {
+    \ "[": function('s:reduce_to_full_link'),
+    \ "(": function('s:reduce_to_link_path'),
+    \ }
+
+  if has_key(l:reducers, l:prev_text)
     return fzf#vim#complete(fzf#vim#with_preview({
       \ 'source': s:zettel_cmd . ' list',
       \ 'prefix': '',
-      \ 'reducer': function('s:reduce_list_items_to_link'),
+      \ 'reducer': l:reducers[l:prev_text],
       \ 'options': ['--delimiter=\\t', '--with-nth=2,3'],
       \ 'placeholder': '{1}',
       \}))
   else
     " default behaviour of tab
+    " TODO: it would be better to not hard-code VimCompletesMe
     return VimCompletesMe#vim_completes_me(0)
   endif
 endfunction
 
-function! s:reduce_list_items_to_link(items)
-  " only handles single item atm
+" only handles single item atm
+function! s:reduce_to_full_link(items)
   let l:zettel = s:parse_list_item(a:items[0])
   return l:zettel.title . '](' . l:zettel.path . ')'
+endfunction
+
+" only handles single item atm
+function! s:reduce_to_link_path(items)
+  let l:zettel = s:parse_list_item(a:items[0])
+  return l:zettel.path . ')'
 endfunction
 
 function! s:parse_list_item(list_item)
