@@ -37,9 +37,8 @@ autoupdate(){
 }
 
 run_bin(){
-  source_chruby
-
   cd "$VOLUME_PATH"
+  source_chruby
 
   script=${1-none}
   shift
@@ -52,9 +51,10 @@ source_chruby(){
   if [[ -r "$CHRUBY_SCRIPT" ]] && [[ -z "${CHRUBY_VERSION-}" ]] ; then
     set +u # these scripts don't work in -u mode
     source "$CHRUBY_SCRIPT"
-    chruby "$(cat .ruby-version)"
     set -u
   fi
+
+  chruby "$(cat .ruby-version)"
 }
 
 sub_mount(){
