@@ -12,28 +12,89 @@ BUNDLE_PATH="$HOME/Dropbox/memex.sparsebundle"
 VOLUME_PATH="/Volumes/Memex"
 CHRUBY_SCRIPT="/usr/local/share/chruby/chruby.sh"
 
+NOCOLOR='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+LIGHTGRAY='\033[0;37m'
+DARKGRAY='\033[1;30m'
+LIGHTRED='\033[1;31m'
+LIGHTGREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+LIGHTBLUE='\033[1;34m'
+LIGHTPURPLE='\033[1;35m'
+LIGHTCYAN='\033[1;36m'
+WHITE='\033[1;37m'
+
+C_CODE="${BLUE}"
+C_PATH="${LIGHTGRAY}"
+
+echoc() {
+  echo -e $@ "${NOCOLOR}"
+}
+
+linetype() {
+  char=${1-?}
+  echo -e -n "${ORANGE}${char}${char}${char}${char}${NOCOLOR}"
+}
+
 sub_help(){
   # Use this script for accessing binaries inside the memex
-    echo "Usage: $PROG_NAME <subcommand> [options]"
-    echo ""
-    echo "Take this script out of the memex volume and put it in your path. It"
-    echo "will mount/eject the volume for you. Also add aliases like:"
-    echo ""
-    echo "    alias journal='memex run journal'"
-    echo "    alias zettel='memex run zettel'"
-    echo ""
-    echo "Subcommands:"
-    echo "    mount"
-    echo "        Mounts the memex volume. Also autoupdates this script with"
-    echo "        the version in the memex volume."
-    echo "    eject"
-    echo "        Unmounts the memex volume, after commiting the data directory"
-    echo "        using 'bin/version_control.rb commit'."
-    echo "    run <script> <args...>"
-    echo "        Mounts the memex volume, runs a script inside, and ejects the"
-    echo "        volume after the script is finished. Does not eject if the"
-    echo "        volume was already mounted."
-    echo ""
+    echoc "${C_CODE}Usage: $PROG_NAME <subcommand> [options]"
+    echo  ""
+    echo  "Take this script out of the memex volume and put it in your path. It"
+    echo  "will mount/eject the volume for you. Also add aliases like:"
+    echo  ""
+    echo  "    alias journal='memex run journal'"
+    echo  "    alias zettel='memex run zettel'"
+    echo  ""
+    echo  "Subcommands:"
+    echoc "    ${C_CODE}mount"
+    echo  "        Mounts the memex volume. Also autoupdates this script with"
+    echo  "        the version in the memex volume."
+    echoc "    ${C_CODE}eject"
+    echo  "        Unmounts the memex volume, after commiting the data directory"
+    echo  "        using 'bin/version_control.rb commit'."
+    echoc "    ${C_CODE}run <script> <args...>"
+    echo  "        Mounts the memex volume, runs a script inside, and ejects the"
+    echo  "        volume after the script is finished. Does not eject if the"
+    echo  "        volume was already mounted."
+    echo  ""
+}
+
+pretty_run() {
+  silent="false"
+  if [[ ${1-} == "--silent" ]] ; then
+    silent="true"
+    shift
+  fi
+
+  prefix=${1-Run}
+  shift
+
+  if [[ "$silent" == true ]] ; then
+    # single line output
+    echoc -n "$(linetype "=") ${prefix}: ${C_CODE}$@${NOCOLOR} ... "
+    eval "$@" > /dev/null
+    if [[ $? == 0 ]] ; then
+      echoc "${GREEN}ok"
+    else
+      echoc "${RED}FAILED"
+    exit 1
+    fi
+  else
+    # multi-line output
+    echoc "$(linetype ">") ${prefix}: ${C_CODE}$@${NOCOLOR}"
+    if eval "$@" ; then
+      echoc "$(linetype "<") ${GREEN}ok"
+    else
+      echoc "$(linetype "<") ${RED}FAILED"
+      exit 1
+    fi
+  fi
 }
 
 autoupdate(){
@@ -41,8 +102,7 @@ autoupdate(){
   source_path="$VOLUME_PATH/bin/memex"
 
   if ! cmp --silent "$copy_path" "$source_path" ; then
-    echo "Autoupdate: cp \"$source_path\" \"$copy_path\""
-    cp "$source_path" "$copy_path"
+    pretty_run --silent "Auto-update" cp "$source_path" "$copy_path"
   fi
 }
 
@@ -52,8 +112,7 @@ run_bin(){
 
   script=${1-none}
   shift
-  echo "Running: bin/${script}.rb $@"
-  bin/${script}.rb $@
+  pretty_run Run "bin/${script}.rb" "$@"
 }
 
 source_chruby(){
@@ -68,17 +127,18 @@ source_chruby(){
 }
 
 sub_mount(){
-  echo "hdiutil attach \"$BUNDLE_PATH\""
-  hdiutil attach "$BUNDLE_PATH"
+  if [ ! -d "$VOLUME_PATH" ] ; then
+    pretty_run Mount hdiutil attach "$BUNDLE_PATH"
+  else
+    echoc "$(linetype "?") Memex already mounted at ${C_PATH}${VOLUME_PATH}"
+  fi
   autoupdate
-  echo "Mounted memex volume at $VOLUME_PATH"
 }
 
 sub_eject(){
   run_bin version_control commit
   cd "$HOME"
-  hdiutil detach "$(hdiutil info | grep "${VOLUME_PATH}" | cut -d$'\t' -f 1)"
-  echo "Ejected memex volume at $VOLUME_PATH"
+  pretty_run --silent Eject hdiutil detach "$(hdiutil info | grep "${VOLUME_PATH}" | cut -d$'\t' -f 1)"
 }
 
 sub_run(){
