@@ -30,6 +30,7 @@ module Zettel
 
       ## References
 
+
     END_TEMPLATE
 
     path(identifier).write(template, mode: 'wx') # never overwrites
