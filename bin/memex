@@ -32,8 +32,13 @@ sub_help(){
 }
 
 autoupdate(){
-  echo "Autoupdate: cp \"$VOLUME_PATH/bin/memex\" \"$0\""
-  cp "$VOLUME_PATH/bin/memex" "$0"
+  copy_path="$0"
+  source_path="$VOLUME_PATH/bin/memex"
+
+  if ! cmp --silent "$copy_path" "$source_path" ; then
+    echo "Autoupdate: cp \"$source_path\" \"$copy_path\""
+    cp "$source_path" "$copy_path"
+  fi
 }
 
 run_bin(){
