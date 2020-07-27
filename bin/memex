@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Allows file to be overwritten while running.
+# See https://stackoverflow.com/questions/2285403/how-to-make-shell-scripts-robust-to-source-being-changed-as-they-run/2358432#2358432
+{
+
 set -ueo pipefail
 IFS=$'\n\t'
 
@@ -104,3 +109,9 @@ case $subcommand in
         fi
         ;;
 esac
+
+# Allows file to be overwritten while running.
+# See https://stackoverflow.com/questions/2285403/how-to-make-shell-scripts-robust-to-source-being-changed-as-they-run/2358432#2358432
+exit
+}
+
