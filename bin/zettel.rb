@@ -100,10 +100,13 @@ module Zettel::CLI
     private
 
       def run_editor(id, template)
-        Zettel.run_editor('-c', 'normal G$', '--', Zettel.path(id))
+        success = Zettel.run_editor('-c', 'normal G$', '--', Zettel.path(id))
 
-        if Zettel.content(id).strip == template.strip
-          puts "Deleting new zettel due to being empty"
+        if !success
+          puts "Editor not exit successfully. Deleting: #{Zettel.path(id)}"
+          Zettel.delete(id)
+        elsif Zettel.content(id).strip == template.strip
+          puts "Zettel was unedited. Deleting: #{Zettel.path(id)}"
           Zettel.delete(id)
         end
       end
