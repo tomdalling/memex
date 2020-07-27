@@ -4,6 +4,8 @@ Memex
 This is a work-in-progress personal project. I might write about it if it
 actually works for me. Time will tell.
 
+![Screenshot of this project running](doc/example.png)
+
 
 Zettel
 ------
