@@ -24,6 +24,7 @@ From Vim:
  - [ ] Search by hashtag
  - [ ] Search by absence of hashtag
  - [ ] ZettelOpenRecent (like FZFMru)
+ - [ ] Ctrl-v (open in split) for ZettelOpen
 
 From command line:
 
