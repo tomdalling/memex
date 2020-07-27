@@ -19,9 +19,11 @@ sub_help(){
     echo ""
     echo "Subcommands:"
     echo "    mount"
-    echo "        Mounts the memex volume"
+    echo "        Mounts the memex volume. Also autoupdates this script with"
+    echo "        the version in the memex volume."
     echo "    eject"
-    echo "        Unmounts the memex volume"
+    echo "        Unmounts the memex volume, after commiting the data directory"
+    echo "        using 'bin/version_control.rb commit'."
     echo "    run <script> <args...>"
     echo "        Mounts the memex volume, runs a script inside, and ejects the"
     echo "        volume after the script is finished. Does not eject if the"
@@ -29,13 +31,41 @@ sub_help(){
     echo ""
 }
 
+autoupdate(){
+  echo "Autoupdate: cp \"$VOLUME_PATH/bin/memex\" \"$0\""
+  cp "$VOLUME_PATH/bin/memex" "$0"
+}
+
+run_bin(){
+  source_chruby
+
+  cd "$VOLUME_PATH"
+
+  script=${1-none}
+  shift
+  echo "Running: bin/${script}.rb $@"
+  bin/${script}.rb $@
+}
+
+source_chruby(){
+  # if chruby exists and it's not already loaded
+  if [[ -r "$CHRUBY_SCRIPT" ]] && [[ -z "${CHRUBY_VERSION-}" ]] ; then
+    set +u # these scripts don't work in -u mode
+    source "$CHRUBY_SCRIPT"
+    chruby "$(cat .ruby-version)"
+    set -u
+  fi
+}
+
 sub_mount(){
   echo "hdiutil attach \"$BUNDLE_PATH\""
   hdiutil attach "$BUNDLE_PATH"
+  autoupdate
   echo "Mounted memex volume at $VOLUME_PATH"
 }
 
 sub_eject(){
+  run_bin version_control commit
   cd "$HOME"
   hdiutil detach "$(hdiutil info | grep "${VOLUME_PATH}" | cut -d$'\t' -f 1)"
   echo "Ejected memex volume at $VOLUME_PATH"
@@ -47,19 +77,7 @@ sub_run(){
     sub_mount
   fi
 
-  cd "$VOLUME_PATH"
-
-  if [[ -r "$CHRUBY_SCRIPT" ]] ; then
-    set +u # these scripts don't work in -u mode
-    source "$CHRUBY_SCRIPT"
-    chruby "$(cat .ruby-version)"
-    set -u
-  fi
-
-  script=${1-none}
-  shift
-  echo "Running: bin/${script}.rb $@"
-  bin/${script}.rb $@
+  run_bin $@
 
   if [ "${did_mount-}" == true ] ; then
     sub_eject
