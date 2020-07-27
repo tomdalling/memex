@@ -58,5 +58,6 @@ Memex
  - [X] CLI for mounting volume
  - [X] CLI for ejecting volume
  - [X] CLI as shortcut for mounting, running script, then ejecting
- - [ ] Auto commit changes to separate git repo that only holds the data dir
+ - [X] Auto commit data changes to separate git repo
+ - [X] CLI auto-updates itself from the master copy inside the memex volume
 
