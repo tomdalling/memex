@@ -27,7 +27,7 @@ module Journal
       chdir: Memex::JOURNAL_DIR,
     )
 
-    if path.read.strip == template.strip
+    if path.exist? && path.read.strip == template.strip
       puts "Deleting journal entry due to being empty: #{path}"
       path.delete # don't leave behind empty journals
     end
