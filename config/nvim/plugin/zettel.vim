@@ -1,4 +1,4 @@
-let s:zettel_cmd = "../../bin/zettel.rb"
+let s:zettel_cmd = "../../bin/zettel"
 let g:zettel#link_regex = '\v\[\[([a-zA-Z0-9_-]{3})\]\]'
 
 function! s:edit_list_item(item)

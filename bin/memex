@@ -57,7 +57,7 @@ sub_help(){
     echo  "        the version in the memex volume."
     echoc "    ${C_CODE}eject"
     echo  "        Unmounts the memex volume, after commiting the data directory"
-    echo  "        using 'bin/version_control.rb commit'."
+    echo  "        using 'bin/version_control commit'."
     echoc "    ${C_CODE}run <script> <args...>"
     echo  "        Mounts the memex volume, runs a script inside, and ejects the"
     echo  "        volume after the script is finished. Does not eject if the"
@@ -108,22 +108,24 @@ autoupdate(){
 
 run_bin(){
   cd "$VOLUME_PATH"
-  source_chruby
+  boot_ruby
 
   script=${1-none}
   shift
-  pretty_run Run "bin/${script}.rb" "$@"
+  pretty_run Run "bin/${script}" "$@"
 }
 
-source_chruby(){
+boot_ruby(){
   # if chruby exists and it's not already loaded
   if [[ -r "$CHRUBY_SCRIPT" ]] && [[ -z "${CHRUBY_VERSION-}" ]] ; then
-    set +u # these scripts don't work in -u mode
+    ruby_version="$(cat .ruby-version)"
+
+    # these scripts don't work in -u mode
+    set +u
     source "$CHRUBY_SCRIPT"
+    chruby "$ruby_version"
     set -u
   fi
-
-  chruby "$(cat .ruby-version)"
 }
 
 sub_mount(){
