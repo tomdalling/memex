@@ -56,6 +56,10 @@ TestBench.context VersionControl do
       assert(subject.("123.45 #### $2") == {})
     end
 
+    test "strips out markdown links" do
+      assert(subject.("[text](abc.md)") == { "text" => 1 })
+    end
+
     test "takes the 30 most frequent words" do
       # w1 w2 w2 w3 w3 w3 ... w40
       words = (1..40).map { Array.new(_1, "w#{_1}").join(' ') }.join("\n")
