@@ -13,7 +13,7 @@ module VersionControl
   end
 
   def default_message
-    changed_paths = changes.map(&:path).select { _1.extname == ".md" }
+    changed_paths = changes.map(&:path).select { File.extname(_1) == ".md" }
     cloud = word_cloud(changed_paths)
 
     if changes.size == 1
