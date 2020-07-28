@@ -1,9 +1,17 @@
 let s:zettel_cmd = "../../bin/zettel"
 let g:zettel#link_regex = '\v\[\[([a-zA-Z0-9_-]{3})\]\]'
 
-function! s:edit_list_item(item)
-  let l:path = split(a:item)[0]
-  execute 'edit' l:path
+function! s:edit_list_item(args)
+  let l:action = a:args[0]
+  let l:item = a:args[1]
+  let l:path = split(l:item)[0]
+  if l:action ==# ''
+    execute 'edit' l:path
+  elseif l:action ==# 'ctrl-v'
+    execute 'vsplit' l:path
+  else
+    echom 'Unhandled action: ' . l:action
+  endif
 endfunction
 
 function! s:zettel_new(title, in_current_buffer)
@@ -16,16 +24,21 @@ function! s:zettel_new(title, in_current_buffer)
   end
 endfunction
 
-function! s:zettel_open(bang)
-  let l:cmd = s:zettel_cmd . ' list'
-  " NB: the 'placeholder' option is undocumented. It's the "{}" part of the
+function! s:zettel_open(fullscreen)
+  " NOTE: the 'placeholder' option is undocumented. It's the "{}" part of the
   " preview command on the FZF command line
-  let l:options = fzf#vim#with_preview({
+  let l:options = fzf#wrap(fzf#vim#with_preview({
+    \ 'source': s:zettel_cmd . ' list',
     \ 'options': ['--delimiter=\\t', '--with-nth=2,3'],
     \ 'placeholder': '{1}',
-    \ 'sink': function('s:edit_list_item'),
-    \ })
-  call fzf#vim#grep(l:cmd, 0, l:options, a:bang)
+    \ }))
+
+  " overwrite the sink function. This needs to be done AFTER fzf#wrap, because
+  " if a sink is present, fzf#wrap does not include the proper options for
+  " opening files with ctrl-v
+  let l:options['sink*'] = function('s:edit_list_item')
+
+  call fzf#vim#files('', l:options, a:fullscreen)
 endfunction
 
 function! s:zettel_grep(qargs, bang)
