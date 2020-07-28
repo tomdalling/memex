@@ -4,6 +4,9 @@ GEM
     concurrent-ruby (1.1.6)
     dry-cli (0.6.0)
       concurrent-ruby (~> 1.0)
+    test_bench (1.2.0.0)
+      test_bench-fixture (>= 1.0.0.0)
+    test_bench-fixture (1.2.1.0)
     value_semantics (3.3.0)
 
 PLATFORMS
@@ -11,6 +14,7 @@ PLATFORMS
 
 DEPENDENCIES
   dry-cli
+  test_bench
   value_semantics
 
 BUNDLED WITH
