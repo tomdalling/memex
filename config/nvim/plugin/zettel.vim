@@ -6,10 +6,14 @@ function! s:edit_list_item(item)
   execute 'edit' l:path
 endfunction
 
-function! s:zettel_new(title)
+function! s:zettel_new(title, in_current_buffer)
   let l:title = (a:title == "" ? "" : shellescape(a:title))
   let l:path = system(s:zettel_cmd . " new --then=print-path " . l:title)
-  execute 'edit' l:path
+  if a:in_current_buffer
+    execute 'edit' l:path
+  else
+    execute 'vsplit' l:path
+  end
 endfunction
 
 function! s:zettel_open(bang)
@@ -79,7 +83,7 @@ function! s:parse_list_item(list_item)
 endfunction
 
 command! -bang ZettelOpen call <sid>zettel_open(<bang>0)
-command! -nargs=* ZettelNew call <sid>zettel_new(<q-args>)
+command! -bang -nargs=* ZettelNew call <sid>zettel_new(<q-args>, <bang>0)
 command! -bang -nargs=* ZettelGrep call <sid>zettel_grep(<q-args>, <bang>0)
 
 nnoremap <leader>. :ZettelOpen<cr>
