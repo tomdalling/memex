@@ -13,19 +13,22 @@ module VersionControl
   end
 
   def default_message
+    changed_paths = changes.map(&:path).select { _1.extname == ".md" }
+    cloud = word_cloud(changed_paths)
+
     if changes.size == 1
       ch = changes.first
-      return "#{ch.verb.capitalize} #{ch.path}\n\n#{word_cloud}"
+      return "#{ch.verb.capitalize} #{ch.path}\n\n#{cloud}"
     end
 
     dir_stat = Memex.sh("git diff --cached --dirstat=files")
     if dir_stat.strip.lines.size == 1
       dir = dir_stat.strip.partition(' ').last
-      return "Updated #{changes.size} files in #{dir}\n\n#{word_cloud}"
+      return "Updated #{changes.size} files in #{dir}\n\n#{cloud}"
     end
 
     summary = Memex.sh("git diff --cached --shortstat").strip
-    summary + "\n\n" + dir_stat
+    "#{summary}\n\n#{cloud}"
   end
 
   def changes
@@ -67,26 +70,25 @@ module VersionControl
       .to_h
   end
 
-  def word_cloud
-    @word_cloud ||= begin
-      lines = []
-      paths = changes.map(&:path).select { _1.extname == ".md" }
+  def word_cloud(file_paths)
+    words = most_frequent_words(file_paths).keys
+    return "No markdown changes detected" if words.empty?
 
-      most_frequent_words(paths).keys.each do |word|
-        if lines.empty?
-          lines << word
+    lines = ["Most common words:"]
+    words.each do |word|
+      if lines.empty?
+        lines << word
+      else
+        possible_line = lines.last + ' ' + word
+        if possible_line.length <= GIT_COMMIT_MESSAGE_BODY_WIDTH
+          lines[-1] = possible_line
         else
-          possible_line = lines.last + ' ' + word
-          if possible_line.length <= GIT_COMMIT_MESSAGE_BODY_WIDTH
-            lines[-1] = possible_line
-          else
-            lines << word
-          end
+          lines << word
         end
       end
-
-      "Most common words:\n" + lines.join("\n")
     end
+
+    lines.join("\n") + "\n"
   end
 
   def strip_regex(str, regex)

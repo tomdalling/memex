@@ -1,25 +1,31 @@
 require_relative '../init'
 
 TestBench.context VersionControl do
+  with_file = ->(file_content, &block) do
+    tempfile = Tempfile.new
+    begin
+      tempfile.write(file_content)
+      tempfile.close
+      return block.call(tempfile.path)
+    ensure
+      tempfile.close
+      tempfile.unlink
+    end
+  end
 
   context ".most_frequent_words" do
     subject = ->(file_content) do
-      tempfile = Tempfile.new
-      begin
-        tempfile.write(file_content)
-        tempfile.close
-        VersionControl.most_frequent_words([tempfile.path])
-      ensure
-        tempfile.close
-        tempfile.unlink
+      with_file.(file_content) do |path|
+        VersionControl.most_frequent_words([path])
       end
     end
 
     test "counts the words used" do
-      assert(
-        subject.("cat cat cat dog dog bird") \
-        == { 'cat' => 3, 'dog' => 2, 'bird' => 1}
-      )
+      assert(subject.("cat cat cat dog dog bird") == {
+        'cat' => 3,
+        'dog' => 2,
+        'bird' => 1,
+      })
     end
 
     test "converts everything to lower case" do
@@ -66,6 +72,29 @@ TestBench.context VersionControl do
         ["cat", 20],
         ["dog", 10],
       ])
+    end
+  end
+
+  context '.word_cloud' do
+    # word1 word2 word2 word3 word3 word3 ... word40
+    input = (1..40).map { Array.new(_1, "word#{_1}").join(' ') }.join("\n")
+    subject = with_file.(input) do |path|
+      VersionControl.word_cloud([path])
+    end
+
+    test "includes the words in the file" do
+      assert(subject.include?("word40"))
+      assert(subject.include?("word39"))
+      assert(subject.include?("word11"))
+    end
+
+    test "wraps lines at 72 chars" do
+      assert(subject.lines.count > 1)
+      assert(subject.lines.all? { _1.strip.length <= 72 })
+    end
+
+    test "ends with a newline" do
+      assert(subject.end_with?("\n"))
     end
   end
 end
