@@ -53,11 +53,11 @@ module VersionControl
   def most_frequent_words(file_paths)
     # NOTE: this could easily be optimised if needed
     file_paths
-      .flat_map { _1.read.split(/\s+/) }
+      .flat_map { File.read(_1).split(/\s+/) }
       .map(&:downcase)
       .select { _1.match?(/[a-z]/) }
-      .map { strip_regex(_1, /[.,?:()\[\]]+/) }
       .map { _1.tr('’“”', "'\"\"") }
+      .map { strip_regex(_1, /[.,?:()"\[\]]+/) }
       .reject { COMMON_WORDS.include?(_1) }
       .select { _1.length >= 2 }
       .tally
