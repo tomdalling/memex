@@ -20,8 +20,11 @@ module Zettel::CLI
   class New < Dry::CLI::Command
     desc "Creates a new zettel file and opens it for editing"
     option :then, default: "edit", values: %w(edit print-path), desc: "What to do after creating the new zettel"
-    example '"Pathname is good #ruby"'
-    example 'Pathname is good "#ruby"'
+
+    example [
+      "'Pathname is good #ruby'",
+      '--then print-path',
+    ]
 
     def call(args: [], **options)
       title = args.empty? ? "Title goes here" : args.join(' ')
@@ -75,6 +78,11 @@ module Zettel::CLI
     desc "Starts vim inside the zettelkasten"
     argument :zettel_id, desc: "The identifier of the zettel to open"
 
+    example [
+      '',
+      "x0r",
+    ]
+
     def call(zettel_id: nil, **)
       if zettel_id
         doc = Zettel::Doc[zettel_id]
@@ -93,6 +101,11 @@ module Zettel::CLI
   class List < Dry::CLI::Command
     desc "Lists zettel in tabular format"
     option :hashtags, desc: "Hashtag query string (e.g. #a AND !#b)"
+
+    example [
+      '',
+      "--hashtags '#a && !#b'",
+    ]
 
     def call(hashtags: nil)
       query = hashtags && Zettel::HashtagQuery.parse(hashtags)
