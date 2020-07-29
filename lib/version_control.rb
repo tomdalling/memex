@@ -107,10 +107,10 @@ module VersionControl
   end
 
   class Change
-    include ValueSemantics.for_attributes {
+    value_attrs do
       path String
       status String
-    }
+    end
 
     STATUSES = {
       "A" => "Added",
