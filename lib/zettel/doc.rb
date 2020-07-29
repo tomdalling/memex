@@ -74,7 +74,8 @@ class Zettel::Doc
     end
   end
 
-  HASHTAG_REGEX = /\s#([a-z0-9_]+)/
+  HASHTAG_REGEX_IGNORING_PRECEDING = /#([a-z0-9_]+)/
+  HASHTAG_REGEX = Regexp.new('\s' + HASHTAG_REGEX_IGNORING_PRECEDING.to_s)
 
   def hashtags
     @hashtags ||= Set.new(

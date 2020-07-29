@@ -2,6 +2,7 @@ require 'date'
 require 'open3'
 require 'set'
 require 'shellwords'
+require 'strscan'
 require 'tempfile'
 
 require 'rubygems'
