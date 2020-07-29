@@ -51,8 +51,21 @@ TestBench.context Zettel::Doc do
     end
   end
 
-  test "extracts the title" do
-    assert(with_subject.(&:title) == "This is the title")
+  context "extracts the title" do
+    test "without loading the entire file content" do
+      with_subject.() do
+        assert(_1.title == "This is the title")
+        assert(_1.instance_variable_get(:@content) == nil)
+      end
+    end
+
+    test "but uses the content if it is already loaded" do
+      with_subject.() do
+        _1.content # load content
+        _1.path.delete # remove file
+        assert(_1.title == "This is the title")
+      end
+    end
   end
 
   test "extracts hashtags" do
@@ -75,13 +88,22 @@ TestBench.context Zettel::Doc do
       File.write(_1.path, "# New content") # overwrite file
       assert(_1.title == "This is the title") # using old, cached value
 
-      _1.purge!
+      return_value = _1.purge!
+      assert(return_value.equal?(_1)) # returns self
 
       # reloaded values
       assert(_1.content == "# New content")
       assert(_1.title == "New content")
       assert(_1.hashtags == Set[])
       assert(_1.links == {})
+    end
+  end
+
+  test "knows if the file exists" do
+    with_subject.() do
+      assert(_1.exists?)
+      _1.path.delete
+      refute(_1.exists?)
     end
   end
 end
