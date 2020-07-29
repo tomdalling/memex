@@ -19,8 +19,8 @@ From Vim:
  - [X] Ctrl-] jumps to linked files
  - [X] Syntax highlighting for hashtags
  - [X] Vim config tailored for text editing (wrapping, etc.)
+ - [X] Search by hashtag (full query syntax like: #a && !#b)
  - [ ] Handle zero ZettelGrep results case (it's doing some weird error)
- - [ ] Search by hashtag (full query syntax like: #a && !#b)
  - [ ] ZettelOpenRecent (like FZFMru)
  - [ ] ZettelNew on highlighted text
 

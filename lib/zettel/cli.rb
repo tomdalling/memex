@@ -92,11 +92,17 @@ module Zettel::CLI
 
   class List < Dry::CLI::Command
     desc "Lists zettel in tabular format"
+    option :hashtags, desc: "Hashtag query string (e.g. #a AND !#b)"
 
-    def call(**options)
+    def call(hashtags: nil)
+      query = hashtags && Zettel::HashtagQuery.parse(hashtags)
+
       Zettel::Doc.each do |doc|
-        path = doc.path.relative_path_from(Dir.pwd).to_path
-        puts [path, doc.id, doc.title].join("\t")
+        if query.nil? || query.match?(doc.hashtags)
+          path = doc.path.relative_path_from(Dir.pwd).to_path
+          puts [path, doc.id, doc.title].join("\t")
+        end
+        doc.purge! # same some memory
       end
     end
   end
