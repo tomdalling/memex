@@ -48,7 +48,7 @@ module Zettel::CLI
   end
 
   class List < Dry::CLI::Command
-    desc "Lists zettels in tabular format"
+    desc "Lists zettel in tabular format"
 
     def call(**options)
       Zettel.each_id do |identifier|
