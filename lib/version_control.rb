@@ -107,7 +107,7 @@ module VersionControl
   end
 
   class Change
-    value_attrs do
+    value_semantics do
       path String
       status String
     end

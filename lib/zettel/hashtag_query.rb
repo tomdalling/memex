@@ -95,7 +95,7 @@ class Zettel::HashtagQuery
           new(name: match.delete_prefix('#'))
         end
 
-        value_attrs do
+        value_semantics do
           name String
         end
 
@@ -199,7 +199,7 @@ class Zettel::HashtagQuery
 
     module AST
       class Hashtag
-        value_attrs do
+        value_semantics do
           name String
         end
 
@@ -213,7 +213,7 @@ class Zettel::HashtagQuery
       end
 
       class Not
-        value_attrs do
+        value_semantics do
           subnode # Node
         end
 
@@ -227,7 +227,7 @@ class Zettel::HashtagQuery
       end
 
       class And
-        value_attrs do
+        value_semantics do
           subnodes Array # Of(Node)
         end
 
@@ -241,7 +241,7 @@ class Zettel::HashtagQuery
       end
 
       class Or
-        value_attrs do
+        value_semantics do
           subnodes Array # Of(Node)
         end
 

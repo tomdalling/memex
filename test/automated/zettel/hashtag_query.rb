@@ -5,7 +5,7 @@ TestBench.context Zettel::HashtagQuery do
   class HashtagQueryFixture
     include TestBench::Fixture
 
-    value_attrs do
+    value_semantics do
       query String
       asserted_matches ArrayOf(ArrayOf(String))
       refuted_matches ArrayOf(ArrayOf(String)), default: []
