@@ -61,7 +61,7 @@ module VersionControl
       .select { _1.match?(/[a-z]/) }
       .reject { _1.match?(/[a-z0-9]{3}\.md/) }
       .map { _1.tr('’“”', "'\"\"") }
-      .map { strip_regex(_1, /[.,?:()"\[\]]+/) }
+      .map { strip_regex(_1, /[.,?:"_*~()\[\]]+/) }
       .reject { COMMON_WORDS.include?(_1) }
       .select { _1.length >= 2 }
       .tally

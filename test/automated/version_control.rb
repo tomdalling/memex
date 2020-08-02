@@ -33,7 +33,9 @@ TestBench.context VersionControl do
     end
 
     test "strips punctuation off words" do
-      assert(subject.('cat, cat. cat? cat: (cat) [cat] "cat"') == { "cat" => 7 })
+      assert(subject.(<<~PUNK_WORDS) == { "cat" => 10 })
+        cat, cat. cat? cat: (cat) [cat] "cat" _cat_ *cat* ~~cat~~
+      PUNK_WORDS
     end
 
     test "counts hashtags" do
