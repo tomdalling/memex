@@ -14,7 +14,15 @@ module VersionControl::CLI
     desc "Prints the words most frequently used in the given files"
 
     def call(args: [])
-      paths = args.map{ Pathname(_1) }.select(&:file?)
+      paths =
+        if args.empty?
+          Dir.chdir(Memex::DATA_DIR)
+          Memex.sh('git add --all')
+          VersionControl.changes.map{ Pathname(_1.path) }.select(&:file?)
+        else
+          args.map{ Pathname(_1) }.select(&:file?)
+        end
+
       pp VersionControl.most_frequent_words(paths)
     end
   end
