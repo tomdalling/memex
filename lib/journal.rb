@@ -16,7 +16,7 @@ module Journal
     end
 
     system(
-      'nvim',
+      ENV.fetch('EDITOR', 'nvim'),
       '-c', 'normal G$',
       '--', path.to_path,
       chdir: Memex::JOURNAL_DIR,
