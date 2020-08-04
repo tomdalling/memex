@@ -14,14 +14,36 @@ function! s:edit_list_item(args)
   endif
 endfunction
 
-function! s:zettel_new(title, in_current_buffer)
-  let l:title = (a:title == "" ? "" : shellescape(a:title))
-  let l:path = system(s:zettel_cmd . " new --then=print-path " . l:title)
-  if a:in_current_buffer
+function! s:zettel_new(title, in_current_buffer, use_selection)
+  let l:old_z = @z
+
+  " get the title to feed into the `bin/zettel new` CLI
+  if a:use_selection
+    " yank selected text into @z
+    normal! gv"zy
+    let l:title = trim(@z . ' ' . a:title)
+  else
+    let l:title = a:title
+  endif
+
+  " make a new zettel and get the path
+  let l:path = trim(system(s:zettel_cmd." new --then=print-path ".shellescape(l:title)))
+
+  " replace selected text with link to new zettel
+  if a:use_selection
+    let @z = '['.l:title.']('.l:path.')'
+    exe "normal! gvc\<c-r>z"
+  endif
+
+  " either edit the new file, or vsplit it
+  if a:in_current_buffer && !&modified
     execute 'edit' l:path
   else
     execute 'vsplit' l:path
   end
+
+  " restore previous value of @z before messing with it
+  let @z = l:old_z
 endfunction
 
 function! s:zettel_open(fullscreen)
@@ -96,7 +118,7 @@ function! s:parse_list_item(list_item)
 endfunction
 
 command! -bang ZettelOpen call <sid>zettel_open(<bang>0)
-command! -bang -nargs=* ZettelNew call <sid>zettel_new(<q-args>, <bang>0)
+command! -bang -range -nargs=* ZettelNew call <sid>zettel_new(<q-args>, <bang>0, <range>)
 command! -bang -nargs=* ZettelGrep call <sid>zettel_grep(<q-args>, <bang>0)
 
 nnoremap <leader>. :ZettelOpen<cr>

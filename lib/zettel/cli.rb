@@ -35,7 +35,7 @@ module Zettel::CLI
 
       case options.fetch(:then)
       when "edit" then edit(doc, template)
-      when "print-path" then puts doc.path.to_path
+      when "print-path" then puts doc.path.relative_path_from(Pathname.pwd)
       else raise "Unknown --then option"
       end
     end
