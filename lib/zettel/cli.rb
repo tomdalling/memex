@@ -42,7 +42,7 @@ module Zettel::CLI
 
     private
       def template(title: "Title goes here")
-        clean_title = title.gsub(Zettel::Doc::HASHTAG_REGEX, "").strip.squeeze
+        clean_title = title.gsub(Zettel::Doc::HASHTAG_REGEX, "").strip.gsub(/\s+/, ' ')
         found_hashtags = title.scan(Zettel::Doc::HASHTAG_REGEX).flatten
         hashtags = (["unprocessed"] + found_hashtags).map{ '#' + _1 }.join(' ')
 
