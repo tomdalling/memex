@@ -1,117 +1,69 @@
-require_relative '../../init'
+require_relative '../../test_init'
 
-TestBench.context Zettel::HashtagQuery do
-
-  class HashtagQueryFixture
-    include TestBench::Fixture
-
-    value_semantics do
-      query String
-      asserted_matches ArrayOf(ArrayOf(String))
-      refuted_matches ArrayOf(ArrayOf(String)), default: []
+context Zettel::HashtagQuery do
+  test "matches the presence of a hashtag" do
+    fixture(HashtagQueryFixture, '#a') do
+      _1.assert_matches(%w(a), %w(a b))
+      _1.refute_matches(%w(), %w(b))
     end
+  end
 
-    def call
-      subject = Zettel::HashtagQuery.parse(query)
-
-      asserted_matches.each do |expected|
-        test "'#{query}' matches #{expected.inspect}" do
-          assert(subject.match?(expected))
-        end
-      end
-
-      refuted_matches.each do |unexpected|
-        test "'#{query}' does not match #{unexpected.inspect}" do
-          refute(subject.match?(unexpected))
-        end
+  test "provides logical NOT" do
+    ['NOT #a', 'not #a', '!#a'].each do |query|
+      fixture(HashtagQueryFixture, query) do
+        _1.assert_matches(%w(), %w(b))
+        _1.refute_matches(%w(a))
       end
     end
   end
 
-  test "hashtags" do
-    fixture(HashtagQueryFixture,
-      query: '#a',
-      asserted_matches: [%w(a), %w(a b)],
-      refuted_matches: [%w(), %w(b)],
-    )
+  test "provides logical AND" do
+    %w(AND and & &&).each do |operator|
+      fixture(HashtagQueryFixture, "#a #{operator} #b") do
+        _1.assert_matches(%w(a b), %w(a b c))
+        _1.refute_matches(%w(a), %w(b))
+      end
+    end
   end
 
-  test "logical NOT" do
-    fixture(HashtagQueryFixture,
-      query: 'NOT #a',
-      asserted_matches: [%w(), %w(b)],
-      refuted_matches: [%w(a)],
-    )
+  test "provides logical OR" do
+    %w(OR or | ||).each do |operator|
+      fixture(HashtagQueryFixture, "#a #{operator} #b") do
+        _1.assert_matches(%w(a), %w(b), %w(a b))
+        _1.refute_matches(%w(), %w(c))
+      end
+    end
   end
 
-  test "logical AND" do
-    fixture(HashtagQueryFixture,
-      query: '#a AND #b',
-      asserted_matches: [%w(a b), %w(a b c)],
-      refuted_matches: [%w(a), %w(b)],
-    )
+  test "gives NOT a higher precedence than AND and OR" do
+    fixture(HashtagQueryFixture, '!#a AND !#b AND !#c') do
+      _1.assert_matches(%w(), %w(d))
+      _1.refute_matches(%w(a), %w(b), %w(c))
+    end
+
+    fixture(HashtagQueryFixture, '!#a OR !#b OR !#c') do
+      _1.assert_matches(%w(), %w(a), %w(b), %w(c))
+      _1.refute_matches(%w(a b c))
+    end
   end
 
-  test "logical OR" do
-    fixture(HashtagQueryFixture,
-      query: '#a OR #b',
-      asserted_matches: [%w(a), %w(b), %w(a b)],
-      refuted_matches: [%w(), %w(c)],
-    )
+  test "is left-associative" do
+    fixture(HashtagQueryFixture, '#a AND #b OR #c') do
+      _1.assert_matches(%w(a b), %w(c))
+    end
   end
 
-  test "NOT has higher precedence than AND or OR" do
-    fixture(HashtagQueryFixture,
-      query: 'NOT #a AND NOT #b OR NOT #c',
-      asserted_matches: [%w(a), %w(b), %w(c)],
-      refuted_matches: [%w(a c), %w(b c)],
-    )
+  test "allows brackets for explicit precedence" do
+    fixture(HashtagQueryFixture, '#a AND (#b OR #c)') do
+      _1.assert_matches(%w(a b), %w(a c))
+      _1.refute_matches(%w(c))
+    end
   end
 
-  test "left-to-right precendence" do
-    fixture(HashtagQueryFixture,
-      query: '#a AND #b OR #c', # ((#a AND #b) OR #c)
-      asserted_matches: [%w(a b), %w(c)],
-    )
-  end
-
-  test "explicit precedence with parens" do
-    fixture(HashtagQueryFixture,
-      query: '#a AND (#b OR #c)',
-      asserted_matches: [%w(a b), %w(a c)],
-      refuted_matches: [%w(c)],
-    )
-  end
-
-  test "complex nesting" do
-    fixture(HashtagQueryFixture,
-      query: '#a AND (NOT (#b OR #c) AND () #d)',
-      asserted_matches: [%w(a d), %w(a x d)],
-      refuted_matches: [%w(a b d), %w(a c d), %w(a)],
-    )
-  end
-
-  test "alternate AND syntax" do
-    fixture(HashtagQueryFixture,
-      query: '#a AND #b and #c & #d && #e',
-      asserted_matches: [%w(a b c d e)],
-      refuted_matches: [%w(a b c d)],
-    )
-  end
-
-  test "alternate OR syntax" do
-    fixture(HashtagQueryFixture,
-      query: '#a OR #b or #c | #d || #e',
-      asserted_matches: [%w(a), %w(b), %w(c), %w(d), %w(e)],
-      refuted_matches: [%w(z)],
-    )
-  end
-
-  test "alternate NOT syntax" do
-    fixture(HashtagQueryFixture,
-      query: 'NOT #a AND not #b AND !#c',
-      asserted_matches: [%w(z)],
-      refuted_matches: [%w(a), %w(b), %w(c)],
-    )
+  test "allows arbitrary nesting" do
+    fixture(HashtagQueryFixture, '(#a) AND (NOT (#b OR (#c)) AND () #d)') do
+      _1.assert_matches(%w(a d), %w(a x d))
+      _1.refute_matches(%w(a b d), %w(a c d), %w(a))
+    end
   end
 end

@@ -1,21 +1,19 @@
-require_relative '../init'
+require_relative '../test_init'
 
-TestBench.context VersionControl do
-  with_file = ->(file_content, &block) do
+context VersionControl do
+  def with_tempfile(file_content)
     tempfile = Tempfile.new
-    begin
-      tempfile.write(file_content)
-      tempfile.close
-      return block.call(tempfile.path)
-    ensure
-      tempfile.close
-      tempfile.unlink
-    end
+    tempfile.write(file_content)
+    tempfile.close
+    return yield tempfile.path
+  ensure
+    tempfile.close
+    tempfile.unlink
   end
 
   context ".most_frequent_words" do
     subject = ->(file_content) do
-      with_file.(file_content) do |path|
+      with_tempfile(file_content) do |path|
         VersionControl.most_frequent_words([path])
       end
     end
@@ -84,7 +82,7 @@ TestBench.context VersionControl do
   context '.word_cloud' do
     # word1 word2 word2 word3 word3 word3 ... word40
     input = (1..40).map { Array.new(_1, "word#{_1}").join(' ') }.join("\n")
-    subject = with_file.(input) do |path|
+    subject = with_tempfile(input) do |path|
       VersionControl.word_cloud([path])
     end
 
@@ -104,3 +102,4 @@ TestBench.context VersionControl do
     end
   end
 end
+

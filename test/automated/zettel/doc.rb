@@ -1,6 +1,6 @@
-require_relative '../../init'
+require_relative '../../test_init'
 
-TestBench.context Zettel::Doc do
+context Zettel::Doc do
   typical_zettel_content = <<~END_ZETTEL
     # This is the title
     Tags: #these #are #the_tags #hy-phen
