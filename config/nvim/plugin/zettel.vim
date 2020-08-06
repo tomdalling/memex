@@ -3,15 +3,23 @@ let g:zettel#link_regex = '\v\[\[([a-zA-Z0-9_-]{3})\]\]'
 
 function! s:edit_list_item(args)
   let l:action = a:args[0]
-  let l:item = a:args[1]
-  let l:path = split(l:item)[0]
+  let l:zettel = s:parse_list_line(a:args[1])
   if l:action ==# ''
-    execute 'edit' l:path
+    execute 'edit' l:zettel.path
   elseif l:action ==# 'ctrl-v'
-    execute 'vsplit' l:path
+    execute 'vsplit' l:zettel.path
   else
     echom 'Unhandled action: ' . l:action
   endif
+endfunction
+
+function! s:parse_list_line(line)
+  let l:parts = split(a:line, '\t')
+  return {
+    \ 'path': l:parts[0],
+    \ 'id': l:parts[1],
+    \ 'title': trim(trim(trim(l:parts[2]), '#')),
+    \ }
 endfunction
 
 function! s:zettel_new(title, in_current_buffer, use_selection)
@@ -79,42 +87,19 @@ endfunction
 
 function! s:complete_link()
   let l:pos = getpos('.')
-  let l:prev_text = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), '\v[\[(]$')
-  let l:reducers = {
-    \ "[": function('s:reduce_to_full_link'),
-    \ "(": function('s:reduce_to_link_path'),
-    \ }
+  let l:prev_char = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), '\v[\[(]$')
 
-  if has_key(l:reducers, l:prev_text)
-    return fzf#vim#complete(fzf#vim#with_preview({
+  if l:prev_char ==# '[' || l:prev_char ==# '('
+    return markdown_extras#link#complete({
       \ 'source': s:zettel_cmd . ' list',
-      \ 'prefix': '',
-      \ 'reducer': l:reducers[l:prev_text],
+      \ 'line_parser': function('<SID>parse_list_line'),
       \ 'options': ['--delimiter=\\t', '--with-nth=2,3'],
-      \ 'placeholder': '{1}',
-      \}))
+      \ })
   else
     " default behaviour of tab
     " TODO: it would be better to not hard-code VimCompletesMe
     return VimCompletesMe#vim_completes_me(0)
   endif
-endfunction
-
-" only handles single item atm
-function! s:reduce_to_full_link(items)
-  let l:zettel = s:parse_list_item(a:items[0])
-  return l:zettel.title . '](' . l:zettel.path . ')'
-endfunction
-
-" only handles single item atm
-function! s:reduce_to_link_path(items)
-  let l:zettel = s:parse_list_item(a:items[0])
-  return l:zettel.path . ')'
-endfunction
-
-function! s:parse_list_item(list_item)
-  let l:parts = split(a:list_item, '\t')
-  return { 'path': l:parts[0], 'id': l:parts[1], 'title': l:parts[2] }
 endfunction
 
 command! -bang ZettelOpen call <sid>zettel_open(<bang>0)
