@@ -12,7 +12,7 @@ Zettel
 
 From Vim:
 
- - [X] ZettelNew: Create new zettel
+ - [X] ZettelNew: Create new zettel, optionally linking highlighted text
  - [X] ZettelOpen: Fuzzy find zettel based on title
  - [X] ZettelGrep: Full text search for zettel
  - [X] Tab-based zettel link autocompletion
@@ -22,7 +22,7 @@ From Vim:
  - [X] Search by hashtag (full query syntax like: #a && !#b)
  - [ ] Handle zero ZettelGrep results case (it's doing some weird error)
  - [ ] ZettelOpenRecent (like FZFMru)
- - [ ] ZettelNew on highlighted text
+ - [ ] View backlinks to a zettel
 
 From command line:
 
@@ -30,6 +30,7 @@ From command line:
  - [X] Auto-delete new zettel that haven't been edited
  - [X] bin/zettel.rb open: Open vim ready to fuzzy find zettel
  - [ ] Find and replace for hashtags
+ - [ ] View backlinks to a zettel
 
 Journal
 -------
@@ -45,11 +46,17 @@ Wiki
 
  - It's a folder of linked markdown, yo.
 
-References
+TODO: References
+----------------
+
+ - links to, or copies of, external materials in an easy-to-reference
+   format
+ - a way to store digitised paper documents?
+
+TODO: Todo
 ----------
 
- - TODO: links to, or copies of, external materials in an easy-to-reference
-   format
+ - A replacement for Todoist, maybe. This is turning into Org mode, man.
 
 Memex
 -----
