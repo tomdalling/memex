@@ -1,63 +1,55 @@
 require_relative '../test_init'
 
 context VersionControl do
-  def with_tempfile(file_content)
-    tempfile = Tempfile.new
-    tempfile.write(file_content)
-    tempfile.close
-    return yield tempfile.path
-  ensure
-    tempfile.close
-    tempfile.unlink
-  end
-
   context ".most_frequent_words" do
-    subject = ->(file_content) do
-      with_tempfile(file_content) do |path|
+    def most_frequent_words(file_content)
+      with_tempfile(content: file_content) do |path|
         VersionControl.most_frequent_words([path])
       end
     end
 
     test "counts the words used" do
-      assert(subject.("cat cat cat dog dog bird") == {
-        'cat' => 3,
-        'dog' => 2,
-        'bird' => 1,
-      })
+      assert_eq(
+        most_frequent_words("cat cat cat dog dog bird"),
+        { 'cat' => 3, 'dog' => 2, 'bird' => 1 },
+      )
     end
 
     test "converts everything to lower case" do
-      assert(subject.("CaT dOg") == { "cat" => 1, "dog" => 1 })
+      assert_eq(most_frequent_words("CaT dOg"), { "cat" => 1, "dog" => 1 })
     end
 
     test "strips punctuation off words" do
-      assert(subject.(<<~PUNK_WORDS) == { "cat" => 10 })
+      assert_eq(most_frequent_words(<<~PUNK_WORDS), { "cat" => 10 })
         cat, cat. cat? cat: (cat) [cat] "cat" _cat_ *cat* ~~cat~~
       PUNK_WORDS
     end
 
     test "counts hashtags" do
-      assert(subject.("#cat #cat #cat") == { "#cat" => 3 })
+      assert_eq(most_frequent_words("#cat #cat #cat"), { "#cat" => 3 })
     end
 
     test "substitutes fancy punctuation for ASCII characters" do
-      assert(subject.('bee’s “knees”') == { "bee's" => 1, "knees" => 1 })
+      assert_eq(
+        most_frequent_words('bee’s “knees”'),
+        { "bee's" => 1, "knees" => 1 }
+      )
     end
 
     test "ignores common words" do
-      assert(subject.("the some was but then") == {})
+      assert_eq(most_frequent_words("the some was but then"), {})
     end
 
     test "ignores single letter words" do
-      assert(subject.("x y z") == {})
+      assert_eq(most_frequent_words("x y z"), {})
     end
 
     test "ignores things that don't look like words" do
-      assert(subject.("123.45 #### $2") == {})
+      assert_eq(most_frequent_words("123.45 #### $2"), {})
     end
 
     test "strips out markdown links" do
-      assert(subject.("[text](abc.md)") == { "text" => 1 })
+      assert_eq(most_frequent_words("[text](abc.md)"), { "text" => 1 })
     end
 
     test "takes the 30 most frequent words" do
@@ -66,12 +58,12 @@ context VersionControl do
       # { "w11" => 11, "w12" => 12, ..., "w40" => 40 }
       expected = (11..40).to_h { ["w#{_1}", _1] }
 
-      assert(subject.(words) == expected)
+      assert_eq(most_frequent_words(words), expected)
     end
 
     test "orders hash elements by frequency" do
       words = ("cat " * 20) + ("dog " * 10) + ("bird " * 30)
-      assert(subject.(words).to_a == [
+      assert_eq(most_frequent_words(words).to_a, [
         ["bird", 30],
         ["cat", 20],
         ["dog", 10],
@@ -82,23 +74,20 @@ context VersionControl do
   context '.word_cloud' do
     # word1 word2 word2 word3 word3 word3 ... word40
     input = (1..40).map { Array.new(_1, "word#{_1}").join(' ') }.join("\n")
-    subject = with_tempfile(input) do |path|
+    word_cloud = with_tempfile(content: input) do |path|
       VersionControl.word_cloud([path])
     end
 
     test "includes the words in the file" do
-      assert(subject.include?("word40"))
-      assert(subject.include?("word39"))
-      assert(subject.include?("word11"))
+      assert_includes(word_cloud, 'word40', 'word39', 'word11')
     end
 
     test "wraps lines at 72 chars" do
-      assert(subject.lines.count > 1)
-      assert(subject.lines.all? { _1.strip.length <= 72 })
+      assert_all(word_cloud.lines) { _1.strip.length <= 72 }
     end
 
     test "ends with a newline" do
-      assert(subject.end_with?("\n"))
+      assert_predicate(word_cloud, :end_with?, "\n")
     end
   end
 end

@@ -1,8 +1,12 @@
 require_relative '../../test_init'
 
 context Zettel::HashtagQuery do
-  def subject(query_string)
-    context_arg.parse(query_string)
+  def with_subject(query_string)
+    context "with syntax: #{query_string}" do
+      subject = context_arg.parse(query_string)
+      detail "Parsed:\n#{subject.pretty_inspect}"
+      yield subject
+    end
   end
 
   test "matches the presence of a hashtag" do
@@ -71,15 +75,9 @@ context Zettel::HashtagQuery do
     end
   end
 
-  def with_subject(query_string)
-    context "with syntax: #{query_string}" do
-      q = subject(query_string)
-      detail "Parsed:\n#{q.pretty_inspect}"
-      yield q
-    end
-  end
+  def assert_matches(query, *tag_sets, caller_location: nil)
+    caller_location ||= caller_locations.first
 
-  def assert_matches(query, *tag_sets)
     tag_sets.each do |ts|
       test do
         detail "should match #{ts.inspect}"
@@ -88,7 +86,9 @@ context Zettel::HashtagQuery do
     end
   end
 
-  def refute_matches(query, *tag_sets)
+  def refute_matches(query, *tag_sets, caller_location: nil)
+    caller_location ||= caller_locations.first
+
     tag_sets.each do |ts|
       test do
         detail "should NOT match #{ts.inspect}"
