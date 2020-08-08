@@ -1,69 +1,99 @@
 require_relative '../../test_init'
 
 context Zettel::HashtagQuery do
+  def subject(query_string)
+    context_arg.parse(query_string)
+  end
+
   test "matches the presence of a hashtag" do
-    fixture(HashtagQueryFixture, '#a') do
-      _1.assert_matches(%w(a), %w(a b))
-      _1.refute_matches(%w(), %w(b))
+    with_subject('#a') do
+      assert_matches(_1, %w(a), %w(a b))
+      refute_matches(_1, %w(), %w(b))
     end
   end
 
   test "provides logical NOT" do
     ['NOT #a', 'not #a', '!#a'].each do |query|
-      fixture(HashtagQueryFixture, query) do
-        _1.assert_matches(%w(), %w(b))
-        _1.refute_matches(%w(a))
+      with_subject(query) do
+        assert_matches(_1, %w(), %w(b))
+        refute_matches(_1, %w(a))
       end
     end
   end
 
   test "provides logical AND" do
     %w(AND and & &&).each do |operator|
-      fixture(HashtagQueryFixture, "#a #{operator} #b") do
-        _1.assert_matches(%w(a b), %w(a b c))
-        _1.refute_matches(%w(a), %w(b))
+      with_subject("#a #{operator} #b") do
+        assert_matches(_1, %w(a b), %w(a b c))
+        refute_matches(_1, %w(a), %w(b))
       end
     end
   end
 
   test "provides logical OR" do
     %w(OR or | ||).each do |operator|
-      fixture(HashtagQueryFixture, "#a #{operator} #b") do
-        _1.assert_matches(%w(a), %w(b), %w(a b))
-        _1.refute_matches(%w(), %w(c))
+      with_subject("#a #{operator} #b") do
+        assert_matches(_1, %w(a), %w(b), %w(a b))
+        refute_matches(_1, %w(), %w(c))
       end
     end
   end
 
   test "gives NOT a higher precedence than AND and OR" do
-    fixture(HashtagQueryFixture, '!#a AND !#b AND !#c') do
-      _1.assert_matches(%w(), %w(d))
-      _1.refute_matches(%w(a), %w(b), %w(c))
+    with_subject('!#a AND !#b AND !#c') do
+      assert_matches(_1, %w(), %w(d))
+      refute_matches(_1, %w(a), %w(b), %w(c))
     end
 
-    fixture(HashtagQueryFixture, '!#a OR !#b OR !#c') do
-      _1.assert_matches(%w(), %w(a), %w(b), %w(c))
-      _1.refute_matches(%w(a b c))
+    with_subject('!#a OR !#b OR !#c') do
+      assert_matches(_1, %w(), %w(a), %w(b), %w(c))
+      refute_matches(_1, %w(a b c))
     end
   end
 
   test "is left-associative" do
-    fixture(HashtagQueryFixture, '#a AND #b OR #c') do
-      _1.assert_matches(%w(a b), %w(c))
+    with_subject('#a AND #b OR #c') do
+      assert_matches(_1, %w(a b), %w(c))
     end
   end
 
   test "allows brackets for explicit precedence" do
-    fixture(HashtagQueryFixture, '#a AND (#b OR #c)') do
-      _1.assert_matches(%w(a b), %w(a c))
-      _1.refute_matches(%w(c))
+    with_subject('#a AND (#b OR #c)') do
+      assert_matches(_1, %w(a b), %w(a c))
+      refute_matches(_1, %w(c))
     end
   end
 
   test "allows arbitrary nesting" do
-    fixture(HashtagQueryFixture, '(#a) AND (NOT (#b OR (#c)) AND () #d)') do
-      _1.assert_matches(%w(a d), %w(a x d))
-      _1.refute_matches(%w(a b d), %w(a c d), %w(a))
+    with_subject('(#a) AND (NOT (#b OR (#c)) AND () #d)') do
+      assert_matches(_1, %w(a d), %w(a x d))
+      refute_matches(_1, %w(a b d), %w(a c d), %w(a))
+    end
+  end
+
+  def with_subject(query_string)
+    context "with syntax: #{query_string}" do
+      q = subject(query_string)
+      detail "Parsed:\n#{q.pretty_inspect}"
+      yield q
+    end
+  end
+
+  def assert_matches(query, *tag_sets)
+    tag_sets.each do |ts|
+      test do
+        detail "should match #{ts.inspect}"
+        assert(query.match?(ts))
+      end
+    end
+  end
+
+  def refute_matches(query, *tag_sets)
+    tag_sets.each do |ts|
+      test do
+        detail "should NOT match #{ts.inspect}"
+        refute(query.match?(ts))
+      end
     end
   end
 end
