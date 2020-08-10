@@ -9,12 +9,15 @@ module Zettel::CLI
       end
     end
 
-    system(
+    args = [
       { 'XDG_CONFIG_DIRS' => Memex::VIM_RUNTIME_DIR.to_path },
       ENV.fetch("EDITOR"),
       *relative_args,
-      chdir: chdir.to_path,
-    )
+    ]
+    kwargs = { chdir: chdir.to_path }
+
+    puts 'system(' + (args.map(&:inspect) + kwargs.map{ "#{_1}: #{_2.inspect}"}).join(', ') + ')'
+    system(*args, **kwargs)
   end
 
   class New < Dry::CLI::Command
