@@ -89,14 +89,24 @@ class Zettel::Doc
       (?<text>[^\]]+) # link text
     \] # close square backet
     \( # open round bracket
-      (?<url>[^)]+) # link url
+      (?<href>[^)]+) # link href
     \) # close round bracket
   }x
 
   def links
     @links ||= content.to_enum(:scan, LINK_REGEX).to_h do
-      m = Regexp.last_match
-      [m[:text], m[:url]]
+      [
+        Regexp.last_match(:text),
+        Addressable::URI.parse(Regexp.last_match(:href))
+      ]
+    end
+  end
+
+  def links_to?(other_path)
+    other_pathname = Pathname(other_path)
+
+    links.any? do |_, href|
+      href.relative? && other_pathname == path.parent / href.path
     end
   end
 

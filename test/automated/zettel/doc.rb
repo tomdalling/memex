@@ -63,7 +63,10 @@ context Zettel::Doc do
         A pasted url:
         https://github.com/tomdalling/memex/tree/main/test/automated/zettel.rb
       END_ZETTEL
-      { "A link" => "abc.md", "a multi\nline\nlink" => "xyz.md" }
+      {
+        "A link" => Addressable::URI.parse("abc.md"),
+        "a multi\nline\nlink" => Addressable::URI.parse("xyz.md"),
+      }
     )
   end
 
@@ -96,6 +99,33 @@ context Zettel::Doc do
       assert_predicate(_1, :exists?)
       _1.path.delete
       refute_predicate(_1, :exists?)
+    end
+  end
+
+  context "checking links to other paths" do
+    doc = subject("some/dir/me.md", content: <<~END_ZETTEL)
+      [same dir](sibling.md)
+      [subdir](sub/child.md)
+      [parent dir](../parent.md)
+      [absolute dir](/Users/tom/absolute.md)
+      [external](https://example.com/)
+    END_ZETTEL
+
+    test "uses relative paths" do
+      assert_predicate(doc, :links_to?, "some/dir/sibling.md")
+      refute_predicate(doc, :links_to?, "sibling.md")
+    end
+
+    test "handles subdirectories" do
+      assert_predicate(doc, :links_to?, "some/dir/sub/child.md")
+    end
+
+    test "handles parent directories" do
+      assert_predicate(doc, :links_to?, "some/parent.md")
+    end
+
+    test "handles absolute paths" do
+      assert_predicate(doc, :links_to?, "/Users/tom/absolute.md")
     end
   end
 

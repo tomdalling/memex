@@ -29,8 +29,8 @@ From command line:
  - [X] bin/zettel.rb new: Create and edit new zettel
  - [X] Auto-delete new zettel that haven't been edited
  - [X] bin/zettel.rb open: Open vim ready to fuzzy find zettel
+ - [X] List back-links to a zettel
  - [ ] Find and replace for hashtags
- - [ ] View backlinks to a zettel
 
 Journal
 -------

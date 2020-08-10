@@ -105,23 +105,62 @@ module Zettel::CLI
   class List < Dry::CLI::Command
     desc "Lists zettel in tabular format"
     option :hashtags, desc: "Hashtag query string (e.g. #a AND !#b)"
+    option :backlinking_to, desc: "Only list zettels that link to this identifier"
 
     example [
       '',
       "--hashtags '#a && !#b'",
+      "--backlinking-to x0r",
     ]
 
-    def call(hashtags: nil)
-      query = hashtags && Zettel::HashtagQuery.parse(hashtags)
+    attr_reader :zettel_repo, :relative_to
 
-      Zettel::Doc.each do |doc|
-        if query.nil? || query.match?(doc.hashtags)
-          path = doc.path.relative_path_from(Dir.pwd).to_path
+    def initialize(zettel_repo: Zettel::Doc, relative_to: Dir.pwd)
+      @zettel_repo = zettel_repo
+      @relative_to = relative_to
+    end
+
+    def call(hashtags: nil, backlinking_to: nil)
+      filter = multi_filter(
+        hashtag_filter(hashtags),
+        backlink_filter(backlinking_to),
+      )
+
+      @zettel_repo.each do |doc|
+        if filter.(doc)
+          path = doc.path.relative_path_from(@relative_to).to_path
           puts [path, doc.id, doc.title].join("\t")
         end
-        doc.purge! # same some memory
+        doc.purge! # save some memory
       end
     end
+
+    private
+      NULL_PREDICATE = ->(doc) { true }
+
+      def multi_filter(*filters)
+        ->(doc) do
+          filters.all? { _1.(doc) }
+        end
+      end
+
+      def hashtag_filter(query_string)
+        if query_string
+          q = Zettel::HashtagQuery.parse(query_string)
+          ->(doc) { q.match?(doc.hashtags) }
+        else
+          NULL_PREDICATE
+        end
+      end
+
+      def backlink_filter(zettel_id)
+        if zettel_id
+          path = @zettel_repo[zettel_id].path
+          ->(doc) { doc.links_to?(path) }
+        else
+          NULL_PREDICATE
+        end
+      end
   end
 
   extend Dry::CLI::Registry
