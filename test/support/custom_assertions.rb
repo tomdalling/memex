@@ -49,11 +49,14 @@ module CustomAssertions
   def assert_predicate(obj, method_name, *args, caller_location: nil, assert_truthy: true, **kwargs, &block)
     caller_location ||= caller_locations.first
 
+    negation = assert_truthy ? ' ' : ' not '
     formatted_args =
       args.map(&:inspect) +
       kwargs.map { "#{_1.inspect}=>#{_2.inspect}" }
     formatted_block = block ? " do ..." : ""
-    detail "Predicate: #{obj.inspect}.#{method_name}(#{formatted_args.join(', ')})#{formatted_block}"
+    formatted_call = "#{obj.inspect}.#{method_name}(#{formatted_args.join(', ')})#{formatted_block}"
+
+    detail "Predicate:#{negation}#{formatted_call}"
 
     result = obj.public_send(method_name, *args, **kwargs, &block)
     if assert_truthy
