@@ -29,8 +29,9 @@ class Zettel::Doc
     fail "Couldn't find a free zettel identifier within a sensible time"
   end
 
-  def initialize(path)
+  def initialize(path, content: nil)
     @path = Pathname(path)
+    @content = content
   end
 
   def id
