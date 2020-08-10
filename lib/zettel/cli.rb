@@ -12,6 +12,7 @@ module Zettel::CLI
     args = [
       { 'XDG_CONFIG_DIRS' => Memex::VIM_RUNTIME_DIR.to_path },
       ENV.fetch("EDITOR"),
+      '--cmd', 'let g:loaded_prosession = 1', # prosession interferes with startup commands
       *relative_args,
     ]
     kwargs = { chdir: chdir.to_path }
