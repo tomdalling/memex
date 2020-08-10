@@ -1,89 +1,84 @@
 require_relative '../../test_init'
 
 context Zettel::Doc do
-  def with_subject(filename: "abc.md", &block)
-    with_tempfile(filename: filename, content: typical_zettel_content) do |path|
-      yield context_arg.new(path)
-    end
-  end
-
-  def typical_zettel_content
-    <<~END_ZETTEL
-      # This is the title
-      Tags: #these #are #the_tags #hy-phen
-
-      Hashtags can be #inline. Not tags: abc#def # xyz qqq#
-
-      [A link](abc.md) in the body text and [a multi
-      line
-      link](xyz.md) too.
-
-      ## References
-
-      > This is a quote in the references section.
-
-      Myself, et al. (2020) _Memex test suite_
-      https://github.com/tomdalling/memex/tree/main/test/automated/zettel.rb
-    END_ZETTEL
+  def subject(filename="in_memory_test_zettel.md", content: typical_zettel_content)
+    context_arg.new(filename, content: content)
   end
 
   test "has a path" do
-    with_subject do
-      assert_predicate(_1.path, :readable?)
-    end
+    assert_eq(subject("xyz.md").path, Pathname("xyz.md"))
   end
 
   test "extracts the id, without loading the content" do
-    with_subject(filename: "x0r.md") do
-      _1.path.delete
-      assert_eq(_1.id, "x0r")
-    end
+    assert_eq(subject("x0r.md").id, 'x0r')
   end
 
   test "loads the content, lazily" do
-    with_subject do
-      File.write(_1.path, "extra!", mode: 'a')
-      assert_eq(_1.content, typical_zettel_content + 'extra!')
+    with_subject_on_disk do
+      _1.path.write("i'm late!")
+      assert_eq(_1.content, "i'm late!")
     end
   end
 
   context "extracts the title" do
     test "without loading the entire file content" do
-      with_subject do
-        assert_eq(_1.title, "This is the title")
+      with_subject_on_disk(content: "# Turtles\nTags: #turtles") do
+        assert_eq(_1.title, "Turtles")
         assert_eq(_1.instance_variable_get(:@content), nil)
       end
     end
 
-    test "but uses the content if it is already loaded" do
-      with_subject do
+    test "uses the content if it is already loaded" do
+      with_subject_on_disk(content: "# Turtles\nTags: #turtles") do
         _1.content # load content
         _1.path.delete # remove file
-        assert_eq(_1.title, "This is the title")
+        assert_eq(_1.title, "Turtles")
       end
     end
   end
 
   test "extracts hashtags" do
     assert_eq(
-      with_subject(&:hashtags),
-      Set.new(%w(these are the_tags inline hy)),
+      subject(content: <<~END_ZETTEL).hashtags,
+        # Title
+        Tags: #these #are #the_tags #hy-phen
+
+        Hashtags can #be, #inline. Not tags: abc#def # xyz qqq#
+
+        ## References
+
+        whatever
+      END_ZETTEL
+      Set.new(%w(these are the_tags be inline hy))
     )
   end
 
   test "extracts links" do
-    assert_eq(with_subject(&:links), {
-      "A link" => "abc.md",
-      "a multi\nline\nlink" => "xyz.md",
-    })
+    assert_eq(
+      subject(content: <<~END_ZETTEL).links,
+        [A link](abc.md) in the body text and [a multi
+        line
+        link](xyz.md) too.
+
+        A pasted url:
+        https://github.com/tomdalling/memex/tree/main/test/automated/zettel.rb
+      END_ZETTEL
+      { "A link" => "abc.md", "a multi\nline\nlink" => "xyz.md" }
+    )
   end
 
   test "can purge cached attributes" do
-    with_subject do
+    old_content = <<~END_ZETTEL
+      # Old Title
+
+      Tag #old and [link](link.md)
+    END_ZETTEL
+
+    with_subject_on_disk(content: old_content) do
       _1.title; _1.content; _1.hashtags; _1.links # cache values
 
       File.write(_1.path, "# New content") # overwrite file
-      assert_eq(_1.title, "This is the title") # using old, cached value
+      assert_eq(_1.title, "Old Title") # using old, cached value
 
       return_value = _1.purge!
       assert(return_value.equal?(_1)) # returns self
@@ -97,10 +92,32 @@ context Zettel::Doc do
   end
 
   test "knows if the file exists" do
-    with_subject do
+    with_subject_on_disk do
       assert_predicate(_1, :exists?)
       _1.path.delete
       refute_predicate(_1, :exists?)
     end
+  end
+
+  def with_subject_on_disk(filename="test_zettel.md", content: typical_zettel_content, &block)
+    with_tempfile(filename: filename, content: content) do |path|
+      yield subject(path, content: nil)
+    end
+  end
+
+  def typical_zettel_content
+    <<~END_ZETTEL
+      # This is the title
+      Tags: #testing #stuff
+
+      Body goes here.
+
+      ## References
+
+      > This is a quote in the references section.
+
+      Myself, et al. (2020) _Memex test suite_
+      https://github.com/tomdalling/memex/tree/main/test/automated/zettel.rb
+    END_ZETTEL
   end
 end
