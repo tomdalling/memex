@@ -85,6 +85,35 @@ function! s:zettel_grep(qargs, bang)
   call fzf#vim#grep(l:cmd, 1, fzf#vim#with_preview(), a:bang)
 endfunction
 
+function! s:qf_dict_from_vimgrep_formatted_line(idx, line)
+  let [l:path, l:lnum, l:col; l:rest] = split(a:line, ':')
+  return {
+    \ 'filename': l:path,
+    \ 'lnum': l:lnum,
+    \ 'col': l:col,
+    \ 'vcol': 1,
+    \ 'text': join(l:rest, ':'),
+    \ }
+endfunction
+
+function! s:zettel_backlinks()
+  let l:zettel_id = expand('%:t:r')
+  let l:cmd = [
+    \ s:zettel_cmd . " list",
+    \ "--backlinking-to=".shellescape(l:zettel_id),
+    \ "--format=vimgrep",
+    \ ]
+  let l:output = trim(system(join(l:cmd, ' ')))
+  let l:lines = split(l:output, "\<nl>")
+  if len(l:lines) > 0
+    let l:qflist = map(l:lines, function('<SID>qf_dict_from_vimgrep_formatted_line'))
+    call setqflist(l:qflist)
+    copen
+  else
+    echom "No backlinks found"
+  endif
+endfunction
+
 function! s:complete_link()
   let l:pos = getpos('.')
   let l:prev_char = matchstr(strpart(getline(l:pos[1]), 0, l:pos[2]-1), '\v[\[(]$')
@@ -105,6 +134,7 @@ endfunction
 command! -bang ZettelOpen call <sid>zettel_open(<bang>0)
 command! -bang -range -nargs=* ZettelNew call <sid>zettel_new(<q-args>, <bang>0, <range>)
 command! -bang -nargs=* ZettelGrep call <sid>zettel_grep(<q-args>, <bang>0)
+command! ZettelBacklinks call <sid>zettel_backlinks()
 
 nnoremap <leader>. :ZettelOpen<cr>
 

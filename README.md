@@ -15,6 +15,7 @@ From Vim:
  - [X] ZettelNew: Create new zettel, optionally linking highlighted text
  - [X] ZettelOpen: Fuzzy find zettel based on title
  - [X] ZettelGrep: Full text search for zettel
+ - [X] ZettelBacklinks: Load back-linking zettels into the quickfix list
  - [X] Tab-based zettel link autocompletion
  - [X] Ctrl-] jumps to linked files
  - [X] Syntax highlighting for hashtags
@@ -22,7 +23,6 @@ From Vim:
  - [X] Search by hashtag (full query syntax like: #a && !#b)
  - [ ] Handle zero ZettelGrep results case (it's doing some weird error)
  - [ ] ZettelOpenRecent (like FZFMru)
- - [ ] View backlinks to a zettel
 
 From command line:
 
