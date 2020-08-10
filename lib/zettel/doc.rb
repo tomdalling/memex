@@ -109,4 +109,8 @@ class Zettel::Doc
 
     self
   end
+
+  def inspect
+    "\#<#{self.class} #{path}>"
+  end
 end
