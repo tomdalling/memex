@@ -13,7 +13,10 @@ module VersionControl
   end
 
   def default_message
-    changed_paths = changes.map(&:path).select { File.extname(_1) == ".md" }
+    changed_paths = changes
+      .map(&:path)
+      .select(&:file?)
+      .select { _1.extname == ".md" }
     cloud = word_cloud(changed_paths)
 
     if changes.size == 1
@@ -107,11 +110,6 @@ module VersionControl
   end
 
   class Change
-    value_semantics do
-      path String
-      status String
-    end
-
     STATUSES = {
       "A" => "Added",
       "C" => "Copied",
@@ -123,6 +121,11 @@ module VersionControl
       "X" => "???",
       "B" => "Broke?",
     }
+
+    value_semantics do
+      path Pathname, coerce: Pathname.method(:new)
+      status String
+    end
 
     def verb
       status
