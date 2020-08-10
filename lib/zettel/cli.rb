@@ -106,6 +106,7 @@ module Zettel::CLI
     desc "Lists zettel in tabular format"
     option :hashtags, desc: "Hashtag query string (e.g. #a AND !#b)"
     option :backlinking_to, desc: "Only list zettels that link to this identifier"
+    option :format, default: 'tabular', values: %w(tabular vimgrep), desc: "The output format"
 
     example [
       '',
@@ -120,16 +121,17 @@ module Zettel::CLI
       @relative_to = relative_to
     end
 
-    def call(hashtags: nil, backlinking_to: nil)
+    def call(hashtags: nil, backlinking_to: nil, format: 'tabular')
       filter = multi_filter(
         hashtag_filter(hashtags),
         backlink_filter(backlinking_to),
       )
+      formatter = formatter_for(format)
 
       @zettel_repo.each do |doc|
         if filter.(doc)
-          path = doc.path.relative_path_from(@relative_to).to_path
-          puts [path, doc.id, doc.title].join("\t")
+          path = doc.path.relative_path_from(@relative_to)
+          puts formatter.(path: path, doc: doc)
         end
         doc.purge! # save some memory
       end
@@ -159,6 +161,27 @@ module Zettel::CLI
           ->(doc) { doc.links_to?(path) }
         else
           NULL_PREDICATE
+        end
+      end
+
+      def formatter_for(format)
+        case format
+        when 'tabular' then TabularFormatter
+        when 'vimgrep' then VimFormatter
+        else raise "Unknown format: #{format}"
+        end
+      end
+
+      module TabularFormatter
+        def self.call(path:, doc:)
+          [path.to_path, doc.id, doc.title].join("\t")
+        end
+      end
+
+      module VimFormatter
+        def self.call(path:, doc:)
+          first_line = doc.content.lines.first.chomp
+          [path.to_path, 1, 1, first_line].join(':')
         end
       end
   end

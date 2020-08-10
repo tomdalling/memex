@@ -47,6 +47,17 @@ context Zettel::CLI::List do
     )
   end
 
+  test 'has a format compatible with vim quickfix window' do
+    assert_eq(
+      run_subject(format: 'vimgrep') do |repo|
+        repo.append(path: "vim.md", title: "Vimmy Wimmy")
+      end,
+      <<~END_OUTPUT
+        vim.md:1:1:# Vimmy Wimmy
+      END_OUTPUT
+    )
+  end
+
   def run_subject(...)
     capture_stdout do
       s = subject
