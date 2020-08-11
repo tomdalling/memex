@@ -1,6 +1,6 @@
 context Zettel::CLI::List do
   def subject
-    context_arg.new(
+    class_under_test.new(
       zettel_repo: ZettelRepoFake.new,
       relative_to: '',
     )

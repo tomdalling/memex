@@ -28,6 +28,14 @@ class RootContext
     instance_eval(&@block)
   end
 
+  def class_under_test
+    if context_arg.is_a?(Class)
+      context_arg
+    else
+      fail("Context was not a class: #{context_arg.inspect}")
+    end
+  end
+
   # defer the tests/contexts (shallow, not recursive)
   # this allows tests to use methods that are defined later in the file
   %w(test context comment detail fixture).each do |method_name|

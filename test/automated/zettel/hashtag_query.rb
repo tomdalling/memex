@@ -1,7 +1,7 @@
 context Zettel::HashtagQuery do
   def with_subject(query_string)
     context "with syntax: #{query_string}" do
-      subject = context_arg.parse(query_string)
+      subject = class_under_test.parse(query_string)
       detail "Parsed:\n#{subject.pretty_inspect}"
       yield subject
     end

@@ -1,6 +1,6 @@
 context Zettel::Doc do
   def subject(filename="in_memory_test_zettel.md", content: typical_zettel_content)
-    context_arg.new(filename, content: content)
+    class_under_test.new(filename, content: content)
   end
 
   test "has a path" do
