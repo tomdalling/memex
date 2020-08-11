@@ -1,6 +1,7 @@
 module Memex
   ROOT_DIR = Pathname.new(__dir__).parent.freeze
   VIM_RUNTIME_DIR = ROOT_DIR / "config"
+  CONFIG_PATH = ROOT_DIR / 'config.yml'
 
   DATA_DIR = ROOT_DIR / "data"
   ZETTEL_DIR = DATA_DIR / "zettel"

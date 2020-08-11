@@ -7,11 +7,17 @@ GEM
     concurrent-ruby (1.1.6)
     dry-cli (0.6.0)
       concurrent-ruby (~> 1.0)
+    faraday (1.0.1)
+      multipart-post (>= 1.2, < 3)
+    faraday_middleware (1.0.0)
+      faraday (~> 1.0)
+    multipart-post (2.1.1)
     public_suffix (4.0.5)
     test_bench (1.2.0.0)
       test_bench-fixture (>= 1.0.0.0)
     test_bench-fixture (1.2.2.0)
     value_semantics (3.4.0)
+    vcr (6.0.0)
 
 PLATFORMS
   ruby
@@ -20,8 +26,11 @@ DEPENDENCIES
   addressable
   byebug
   dry-cli
+  faraday
+  faraday_middleware
   test_bench
   value_semantics
+  vcr
 
 BUNDLED WITH
    2.1.4
