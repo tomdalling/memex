@@ -1,13 +1,11 @@
 context Todoist::Client do
-  subject = context_arg.new(Config[:todoist_api_token])
+  subject = class_under_test.new(Config[:todoist_api_token])
 
   def vcr_test(name, &block)
-    cassette = "#{context_arg}/#{name}"
-    context do
+    cassette = "#{class_under_test}/#{name}"
+    test(name) do
       detail 'Cassette: ' + cassette
-      VCR.use_cassette(cassette) do
-        test(name, &block)
-      end
+      VCR.use_cassette(cassette, &block)
     end
   end
 
