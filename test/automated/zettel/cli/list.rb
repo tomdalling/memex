@@ -1,5 +1,3 @@
-require_relative '../../../test_init'
-
 context Zettel::CLI::List do
   def subject
     context_arg.new(

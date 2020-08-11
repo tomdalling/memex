@@ -1,5 +1,3 @@
-require_relative '../test_init'
-
 context VersionControl do
   context ".most_frequent_words" do
     def most_frequent_words(file_content)

@@ -1,5 +1,3 @@
-require_relative '../../test_init'
-
 context Zettel::Doc do
   def subject(filename="in_memory_test_zettel.md", content: typical_zettel_content)
     context_arg.new(filename, content: content)

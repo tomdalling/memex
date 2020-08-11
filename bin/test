@@ -1,4 +1,9 @@
-#!/bin/bash
-set -euo pipefail
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'bundler/setup'
 
-bundle exec bench test/automated/
+# require test_init.rb implicitly (without writing it in the test file)
+require_relative '../test/test_init'
+
+# Run the normal `bench` CLI
+TestBench::CLI.()

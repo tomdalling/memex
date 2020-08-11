@@ -1,5 +1,3 @@
-require_relative '../../test_init'
-
 context Zettel::HashtagQuery do
   def with_subject(query_string)
     context "with syntax: #{query_string}" do
