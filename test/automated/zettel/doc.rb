@@ -22,7 +22,7 @@ context Zettel::Doc do
     test "without loading the entire file content" do
       with_subject_on_disk(content: "# Turtles\nTags: #turtles") do
         assert_eq(_1.title, "Turtles")
-        assert_eq(_1.instance_variable_get(:@content), nil)
+        assert_nil(_1.instance_variable_get(:@content))
       end
     end
 

@@ -46,7 +46,22 @@ context Todoist::Due do
     end
 
     test "has a nil time" do
-      assert_eq(subject.time, nil)
+      assert_nil(subject.time)
     end
+  end
+
+  test "converts to a JSON command arg using the date" do
+    assert_eq(
+      class_under_test['2000-01-02'].to_command_arg(:date),
+      { date: '2000-01-02' },
+    )
+  end
+
+  test "converts to a JSON command arg using the string" do
+    subject = class_under_test['2000-01-02', string: 'every day']
+    assert_eq(
+      subject.to_command_arg(:string),
+      { string: 'every day' },
+    )
   end
 end

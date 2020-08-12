@@ -2,9 +2,24 @@ module CustomAssertions
   def assert_eq(actual, expected, caller_location: nil)
     caller_location ||= caller_locations.first
 
-    detail "Expected: #{expected.inspect}"
-    detail "  Actual: #{actual.inspect}"
-    assert(actual == expected, caller_location: caller_location)
+    if nil == actual && nil == expected
+      detail "Must be non-nil, but actual and expected values were both `nil`. Use `assert_nil` if this is intended."
+    else
+      detail "Expected: #{expected.inspect}"
+      detail "  Actual: #{actual.inspect}"
+    end
+
+    assert(
+      actual == expected && expected != nil,
+      caller_location: caller_location,
+    )
+  end
+
+  def assert_nil(actual, caller_location: nil)
+    assert(
+      nil == actual,
+      caller_location: caller_location || caller_locations.first,
+    )
   end
 
   def assert_includes(haystack, *needles, caller_location: nil)
@@ -116,6 +131,15 @@ module CustomAssertions
   ensure
     file.close if file
     path.delete if path&.exist?
+  end
+
+  def capture_stdout
+    old_stdout = $stdout
+    $stdout = StringIO.new
+    yield
+    return $stdout.string
+  ensure
+    $stdout = old_stdout
   end
 
   def with_cassette(name, &block)

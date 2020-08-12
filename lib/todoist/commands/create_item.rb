@@ -1,4 +1,5 @@
 require 'uuid'
+require 'todoist/due'
 
 class Todoist::Commands::CreateItem
   NON_ITEM_ATTRS = %i(temp_id uuid)
@@ -7,7 +8,9 @@ class Todoist::Commands::CreateItem
     content String
     project_id Either(Integer, UUID, nil), default: nil
     parent_id Either(Integer, UUID, nil), default: nil
+    child_order Either(Integer, nil), default: nil
     label_ids Either(ArrayOf(Integer), nil), coerce: true, default: nil
+    due Either(Todoist::Due, nil), default: nil # TODO: implement this
 
     temp_id Either(UUID, nil), default: nil
     uuid UUID, default_generator: UUID.method(:random)
@@ -36,6 +39,7 @@ class Todoist::Commands::CreateItem
   def args
     to_h
       .except(*NON_ITEM_ATTRS)
+      .merge(due: due&.to_command_arg(:date))
       .compact
   end
 end

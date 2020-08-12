@@ -1,6 +1,4 @@
 module Journal::CLI
-  extend Dry::CLI::Registry
-
   class Today < Dry::CLI::Command
     desc "Opens the journal entry for today, creating it if it doesn't exist"
 
@@ -25,6 +23,7 @@ module Journal::CLI
     end
   end
 
+  extend Dry::CLI::Registry
   register "today", Today
   register "yesterday", Yesterday
   register "tomorrow", Tomorrow

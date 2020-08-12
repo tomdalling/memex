@@ -9,6 +9,7 @@ module Todoist
       due Types::Nilable[Due]
       label_ids Types::SetOf[Types::Id], json_key: 'labels'
       priority Types::Priority
+      child_order Types::Integer
       checked? Types::Bool, json_key: 'checked'
       deleted? Types::Bool, json_key: 'is_deleted'
       collapsed? Types::Bool, json_key: 'collapsed'

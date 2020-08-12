@@ -63,13 +63,4 @@ context Zettel::CLI::List do
       s.(...)
     end
   end
-
-  def capture_stdout
-    old_stdout = $stdout
-    $stdout = StringIO.new
-    yield
-    return $stdout.string
-  ensure
-    $stdout = old_stdout
-  end
 end

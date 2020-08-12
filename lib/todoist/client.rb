@@ -26,8 +26,8 @@ module Todoist
       @everything
     end
 
-    def run_commands(commands)
-      run_endpoint(SyncCommands, commands)
+    def run_commands(*commands)
+      run_endpoint(SyncCommands, commands.flatten)
     end
 
     private

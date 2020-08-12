@@ -53,5 +53,9 @@ module Todoist
         Time.iso8601(raw)
       end
     end
+
+    def to_s
+      raw
+    end
   end
 end

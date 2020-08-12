@@ -30,7 +30,8 @@ module Todoist
         if element
           element
         else
-          fail "#{collection_name.to_s.capitalize} not found for #{query.inspect}"
+          type = collection_name.to_s.capitalize.chomp('s')
+          fail "#{type} not found for #{query.inspect}"
         end
       end
   end
