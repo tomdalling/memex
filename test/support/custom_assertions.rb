@@ -70,6 +70,18 @@ module CustomAssertions
     assert_predicate(*args, **kwargs.merge(assert_truthy: false), &block)
   end
 
+  def assert_is_a(obj, type)
+    detail "Expected type: #{type}"
+    detail "  Actual type: #{obj.class} (#{obj.inspect})"
+    assert(obj.is_a?(type))
+  end
+
+  def assert_matches(str, regex)
+    detail "Pattern: #{regex}"
+    detail "  Value: #{str.inspect}"
+    assert(regex.match?(str))
+  end
+
   def with_tempfile(content:, filename: nil)
     filename ||= SecureRandom.hex(8) + '.tmp'
     path = TEST_TMP_DIR / filename
@@ -82,5 +94,11 @@ module CustomAssertions
   ensure
     file.close if file
     path.delete if path&.exist?
+  end
+
+  def with_cassette(name, &block)
+    cassette = "#{context_arg}/#{name}"
+    detail 'Cassette: ' + cassette
+    VCR.use_cassette(cassette, &block)
   end
 end

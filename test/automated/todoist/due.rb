@@ -1,5 +1,5 @@
 context Todoist::Due do
-  context "with fixed raw_date" do
+  context "with fixed date" do
     subject = class_under_test['2000-01-02T03:04:05Z']
 
     test "detects the type" do
@@ -16,7 +16,7 @@ context Todoist::Due do
     end
   end
 
-  context "with floating raw_date" do
+  context "with floating date" do
     subject = class_under_test['2000-01-02T03:04:05']
 
     test "detects the type" do
@@ -33,7 +33,7 @@ context Todoist::Due do
     end
   end
 
-  context "with full_day raw_date" do
+  context "with full_day date" do
     subject = class_under_test['2000-01-02']
 
     test "detects the type" do

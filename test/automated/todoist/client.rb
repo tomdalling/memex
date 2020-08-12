@@ -1,15 +1,10 @@
 context Todoist::Client do
   subject = class_under_test.new(Config[:todoist_api_token])
 
-  def vcr_test(name, &block)
-    cassette = "#{class_under_test}/#{name}"
-    test(name) do
-      detail 'Cassette: ' + cassette
-      VCR.use_cassette(cassette, &block)
-    end
-  end
-
-  vcr_test "lists all items" do
-    assert_all(subject.items) { _1.is_a?(Todoist::Item) }
+  test "loads everything" do
+    everything = with_cassette("everything") { subject.everything }
+    assert_is_a(everything, Todoist::Everything)
+    refute_empty(everything.items)
+    refute_empty(everything.labels)
   end
 end
