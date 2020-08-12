@@ -2,10 +2,10 @@ module Todoist::Types::String
   extend self
 
   def validator
-    String
+    ::String
   end
 
   def coercer
-    nil
+    :itself.to_proc
   end
 end

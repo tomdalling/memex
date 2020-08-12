@@ -7,3 +7,15 @@ class Array
     end
   end
 end
+
+class Hash
+  def except(*keys)
+    reject { keys.include?(_1) }
+  end
+end
+
+class Object
+  def in?(collection)
+    collection.include?(self)
+  end
+end

@@ -8,13 +8,35 @@ module CustomAssertions
   end
 
   def assert_includes(haystack, *needles, caller_location: nil)
-    caller_location ||= caller_locations.first
+    assfute_includes(haystack, needles,
+      assert_method: :assert,
+      detail_prefix: "should include",
+      caller_location: caller_location || caller_locations.first,
+    )
+  end
 
-    detail "Haystack: #{haystack.inspect}"
-    needles.each do |n|
-      test do
-        detail "  Needle: #{n.inspect}"
-        assert(haystack.include?(n), caller_location: caller_location)
+  def refute_includes(haystack, *needles, caller_location: nil)
+    assfute_includes(haystack, needles,
+      assert_method: :refute,
+      detail_prefix: "should EXclude",
+      caller_location: caller_location || caller_locations.first,
+    )
+  end
+
+  def assfute_includes(
+    haystack,
+    needles,
+    caller_location:,
+    detail_prefix:,
+    assert_method:
+  )
+    context do
+      detail "Collection: #{haystack.inspect}"
+      needles.each do |n|
+        test do
+          detail "#{detail_prefix}: #{n.inspect}"
+          send(assert_method, haystack.include?(n), caller_location: caller_location)
+        end
       end
     end
   end

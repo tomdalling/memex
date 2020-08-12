@@ -5,6 +5,7 @@ require 'shellwords'
 require 'strscan'
 require 'tempfile'
 require 'yaml'
+require 'securerandom'
 
 require 'rubygems'
 require 'bundler/setup'

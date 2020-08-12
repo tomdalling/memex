@@ -1,4 +1,4 @@
-module Todoist::Types::Id
+module Todoist::Types::Integer
   extend self
 
   def validator
