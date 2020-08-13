@@ -88,6 +88,23 @@ context DuckCheck do
     end
   end
 
+  context 'mixin' do
+    module IOne; end
+    module ITwo; end
+    module IThree; end
+
+    class Threeterface
+      extend SubjectMixin
+      implements IOne, ITwo, IThree
+    end
+
+    test "records interface declarations" do
+      assert_predicate(Threeterface, :implements?, IOne)
+      assert_predicate(Threeterface, :implements?, ITwo)
+      assert_predicate(Threeterface, :implements?, IThree)
+    end
+  end
+
   def assert_infringement(message, caller_location: nil)
     caller_location ||= caller_locations.first
 

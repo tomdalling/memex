@@ -22,8 +22,18 @@ module DuckCheck
         @records = []
       end
 
-      def implements(interface, implementor)
-        records << Record.new(interface: interface, implementor: implementor)
+      def implements(implementor, *interfaces)
+        records.concat(
+          interfaces.map do
+            Record.new(interface: _1, implementor: implementor)
+          end
+        )
+      end
+
+      def implements?(implementor, interface)
+        records.any? do
+          _1.interface.equal?(interface) && _1.implementor.equal?(implementor)
+        end
       end
 
       def check!(implementor = nil)
@@ -46,13 +56,21 @@ module DuckCheck
 
       def class_methods_mixin
         Module.new do
-          def implements(interface)
-            singleton_class::DUCK_CHECK_REGISTRY.implements(interface, self)
+          def duck_check_registry
+            singleton_class::DUCK_CHECK_REGISTRY
+          end
+
+          def implements(*interfaces)
+            duck_check_registry.implements(self, *interfaces)
+          end
+
+          def implements?(interface)
+            duck_check_registry.implements?(self, interface)
           end
 
           def self.included(base)
-            registry = self::DUCK_CHECK_REGISTRY
-            base.const_set("DuckCheck_MonkeyPatch_#{registry.object_id}", self)
+            name = "DuckCheck_MonkeyPatch_#{base.duck_check_registry.object_id}"
+            base.const_set(name, self)
           end
         end.tap do |m|
           m.const_set(:DUCK_CHECK_REGISTRY, self)
