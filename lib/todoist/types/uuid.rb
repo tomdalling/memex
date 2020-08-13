@@ -1,16 +1,20 @@
-module Todoist::Types::UUID
-  extend self
+module Todoist
+  module Types::UUID
+    implements IType
 
-  def validator
-    ::UUID
-  end
+    extend self
 
-  def coercer
-    ->(value) do
-      if value.is_a?(String) && UUID.valid_format?(value)
-        ::UUID.new(formatted: value)
-      else
-        value
+    def validator
+      ::UUID
+    end
+
+    def coercer
+      ->(value) do
+        if value.is_a?(String) && UUID.valid_format?(value)
+          ::UUID.new(formatted: value)
+        else
+          value
+        end
       end
     end
   end

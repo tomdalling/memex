@@ -1,16 +1,20 @@
-module Todoist::Types::Time
-  extend self
+module Todoist
+  module Types::Time
+    implements IType
 
-  def validator
-    ::Time
-  end
+    extend self
 
-  def coercer
-    ->(value) do
-      if value.is_a?(String) && Date._iso8601(value).any?
-        Time.iso8601(value)
-      else
-        value
+    def validator
+      ::Time
+    end
+
+    def coercer
+      ->(value) do
+        if value.is_a?(String) && Date._iso8601(value).any?
+          Time.iso8601(value)
+        else
+          value
+        end
       end
     end
   end

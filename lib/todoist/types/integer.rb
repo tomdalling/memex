@@ -1,11 +1,15 @@
-module Todoist::Types::Integer
-  extend self
+module Todoist
+  module Types::Integer
+    implements IType
 
-  def validator
-    ::Integer
-  end
+    extend self
 
-  def coercer
-    :itself.to_proc
+    def validator
+      ::Integer
+    end
+
+    def coercer
+      :itself.to_proc
+    end
   end
 end

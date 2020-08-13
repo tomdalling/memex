@@ -1,13 +1,17 @@
-module Todoist::Types::Priority
-  extend self
+module Todoist
+  module Types::Priority
+    implements IType
 
-  VALID_VALUES = Set[1, 2, 3, 4]
+    extend self
 
-  def validator
-    ->(value) { VALID_VALUES.include?(value) }
-  end
+    VALID_VALUES = Set[1, 2, 3, 4]
 
-  def coercer
-    :itself.to_proc
+    def validator
+      ->(value) { VALID_VALUES.include?(value) }
+    end
+
+    def coercer
+      :itself.to_proc
+    end
   end
 end

@@ -1,16 +1,20 @@
-module Todoist::Types::Bool
-  extend self
+module Todoist
+  module Types::Bool
+    implements IType
 
-  def validator
-    ValueSemantics::Bool
-  end
+    extend self
 
-  def coercer
-    ->(value) do
-      case value
-      when 1 then true
-      when 0 then false
-      else value
+    def validator
+      ValueSemantics::Bool
+    end
+
+    def coercer
+      ->(value) do
+        case value
+        when 1 then true
+        when 0 then false
+        else value
+        end
       end
     end
   end
