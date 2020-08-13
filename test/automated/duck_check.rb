@@ -1,5 +1,6 @@
 context DuckCheck do
   subject = DuckCheck::Registry.new
+  # this is a hack only needed for test isolation
   SubjectMixin = subject.class_methods_mixin
 
   module IDuck
@@ -15,10 +16,13 @@ context DuckCheck do
     def waddle(*locations, speed:, &callback)
       param locations, Array[Location]
       param speed, Float
-      callback.call do |location|
+
+      yields_to callback do |location|
         param location Location
         returns void
       end
+
+      returns void
     end
   end
 

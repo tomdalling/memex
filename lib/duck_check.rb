@@ -63,28 +63,29 @@ module DuckCheck
 
         def infringements_for_record(record)
           record.interface.instance_methods.flat_map do |method_name|
-            Array(
-              infringements_for_method(method_name, record: record)
-            )
+            infringement_types_for_method(method_name, record: record)
+              .map { |type| Infringement.for(type, method_name, record) }
           end
         end
 
-        def infringements_for_method(method_name, record:)
+        def infringement_types_for_method(method_name, record:)
           unless record.implementor.instance_methods.include?(method_name)
-            return Infringement.not_implemented(method_name, record)
+            return [:not_implemented]
           end
+
+          infringement_types = []
 
           iface_method = record.interface.instance_method(method_name)
           impl_method = record.implementor.instance_method(method_name)
           if iface_method.arity != impl_method.arity
-            return Infringement.wrong_arity(method_name, record)
+            infringement_types << :wrong_arity
           end
 
           if takes_block?(iface_method) && !takes_block?(impl_method)
-            return Infringement.no_block_param(method_name, record)
+            infringement_types << :no_block_param
           end
 
-          []
+          infringement_types
         end
 
         def takes_block?(method)
@@ -105,31 +106,8 @@ module DuckCheck
         message String
       end
 
-      def self.not_implemented(method_name, record)
-        f_impl = format_implementor(record.implementor)
-        f_method = format_method(record.interface.instance_method(method_name))
-        new(
-          message: "#{f_impl} does not implement #{f_method}",
-          record: record,
-        )
-      end
-
-      def self.wrong_arity(method_name, record)
-        f_impl = format_method(record.implementor.instance_method(method_name))
-        f_iface = format_method(record.interface.instance_method(method_name))
-        new(
-          message: "#{f_impl} does not match arity of #{f_iface}",
-          record: record,
-        )
-      end
-
-      def self.no_block_param(method_name, record)
-        f_impl = format_method(record.implementor.instance_method(method_name))
-        f_iface = format_method(record.interface.instance_method(method_name))
-        new(
-          message: "#{f_impl} does not take a block like #{f_iface}",
-          record: record,
-        )
+      def self.for(type, method_name, record)
+        public_send(type, method_name, record)
       end
 
       def to_s
@@ -137,6 +115,33 @@ module DuckCheck
       end
 
       private
+
+        def self.not_implemented(method_name, record)
+          f_impl = format_implementor(record.implementor)
+          f_method = format_method(record.interface.instance_method(method_name))
+          new(
+            message: "#{f_impl} does not implement #{f_method}",
+            record: record,
+          )
+        end
+
+        def self.wrong_arity(method_name, record)
+          f_impl = format_method(record.implementor.instance_method(method_name))
+          f_iface = format_method(record.interface.instance_method(method_name))
+          new(
+            message: "#{f_impl} does not match arity of #{f_iface}",
+            record: record,
+          )
+        end
+
+        def self.no_block_param(method_name, record)
+          f_impl = format_method(record.implementor.instance_method(method_name))
+          f_iface = format_method(record.interface.instance_method(method_name))
+          new(
+            message: "#{f_impl} does not take a block like #{f_iface}",
+            record: record,
+          )
+        end
 
         def self.format_implementor(implementor)
           "`#{implementor}`"
