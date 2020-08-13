@@ -12,10 +12,10 @@ context DuckCheck do
       returns void
     end
 
-    def waddle(*locations, speed:)
+    def waddle(*locations, speed:, &callback)
       param locations, Array[Location]
       param speed, Float
-      yields do |location|
+      callback.call do |location|
         param location Location
         returns void
       end
@@ -28,7 +28,7 @@ context DuckCheck do
       implements IDuck
       def quack!; end
       def eat(food); end
-      def waddle(*location, speed:); end
+      def waddle(*location, speed:, &block); end
     end
 
     test "does not include any modules into classes" do
@@ -47,6 +47,7 @@ context DuckCheck do
       extend SubjectMixin
       implements IDuck
       def eat; end
+      def waddle(*locations, speed:); end
     end
 
     test "raises an error when checking conformance" do
@@ -61,6 +62,14 @@ context DuckCheck do
 
     test "detects incorrect arity" do
       assert_infringement("`Whale#eat` does not match arity of `IDuck#eat(food)`")
+    end
+
+    test "detects missing block" do
+      assert_infringement(
+        "`Whale#waddle(*locations, speed:)` " +
+        "does not take a block like " +
+        "`IDuck#waddle(*locations, speed:, &callback)`"
+      )
     end
   end
 

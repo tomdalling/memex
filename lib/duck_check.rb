@@ -80,7 +80,15 @@ module DuckCheck
             return Infringement.wrong_arity(method_name, record)
           end
 
+          if takes_block?(iface_method) && !takes_block?(impl_method)
+            return Infringement.no_block_param(method_name, record)
+          end
+
           []
+        end
+
+        def takes_block?(method)
+          method.parameters.any? { _1.first == :block }
         end
     end
 
@@ -115,6 +123,15 @@ module DuckCheck
         )
       end
 
+      def self.no_block_param(method_name, record)
+        f_impl = format_method(record.implementor.instance_method(method_name))
+        f_iface = format_method(record.interface.instance_method(method_name))
+        new(
+          message: "#{f_impl} does not take a block like #{f_iface}",
+          record: record,
+        )
+      end
+
       def to_s
         message
       end
@@ -144,7 +161,7 @@ module DuckCheck
           case type
           when :req then name.to_s
           when :rest then "*#{name}"
-          when :blk then "&#{name}"
+          when :block then "&#{name}"
           when :keyreq then "#{name}:"
           else "<#{type}>#{name}"
           end
