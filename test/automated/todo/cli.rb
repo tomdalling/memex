@@ -1,57 +1,62 @@
 context Todo::CLI do
   todoist = TodoistClientFake.new
-  l_checklist = todoist.label!("Checklist")
-  l_keep = todoist.label!("Keep")
-  i_grandparent = todoist.item!
-  i_parent = todoist.item!(
-    content: "Stuff",
-    labels: [l_checklist, l_keep],
-    parent: i_grandparent,
-    due: Todoist::Due.today(recurring?: true),
-  )
-  i_child = todoist.item!(content: "Substuff", parent: i_parent)
 
-  subject = Todo::CLI::Checklist.new(todoist_client: todoist)
+  # projects
+  p_checklists = todoist.project!("Checklists")
+
+  # labels
+  l_checklist = todoist.label!("Checklist")
+  l_other = todoist.label!("Other label")
+
+  # items
+  i_recurring = todoist.item!("Stuff", labels: l_checklist, due: 'today')
+  i_checklist = todoist.item!("Stuff", project: p_checklists, labels: l_other)
+  i_child = todoist.item!("Substuff", parent: i_checklist, labels: l_other)
+
+  # run CLI
+  subject = Todo::CLI::Checklist.new(
+    todoist_client: todoist,
+    stdout: StringIO.new,
+    stderr: StringIO.new,
+  )
   subject.()
 
-  cmd_check = todoist.find_cmd(type: :item_close)
-  cmd_parent = todoist.find_cmd(type: :item_add, content: "Stuff")
-  cmd_child = todoist.find_cmd(type: :item_add, content: "Substuff")
+  # extract commands run
+  cmd_check_recurring = todoist.find_cmd(type: :item_close)
+  cmd_dup_parent = todoist.find_cmd(type: :item_add, content: /Stuff/)
+  cmd_dup_child = todoist.find_cmd(type: :item_add, content: "Substuff")
 
-  test "duplicates the parent item" do
-    assert(cmd_parent)
+  test "checks off the recurring item" do
+    assert(cmd_check_recurring)
+    assert_eq(cmd_check_recurring.id, i_recurring.id)
   end
 
-  test "does not set a project for duplicated parent item" do
-    assert_nil(cmd_parent.project_id)
+  test "duplicates the checklist item" do
+    assert(cmd_dup_parent)
   end
 
-  test "orphans the duplicated parent item" do
-    assert_nil(cmd_parent.parent_id)
+  test "adds '(checklist)' to the duplicated checklist item" do
+    assert_eq(cmd_dup_parent.content, "Stuff (Checklist)")
   end
 
-  test "makes the duplicated parent item non-recurring" do
-    refute_predicate(cmd_parent.due, :recurring?)
+  test "keeps the project_id of the duplicated checklist" do
+    assert_eq(cmd_dup_parent.project_id, i_checklist.project_id)
   end
 
-  test "removes the 'Checklist' label from duplicated items" do
-    refute_includes(cmd_parent.label_ids, l_checklist.id)
-  end
-
-  test "keeps other labels on duplicated items" do
-    assert_includes(cmd_parent.label_ids, l_keep.id)
+  test "makes the duplicated checklist due today" do
+    assert_predicate(cmd_dup_parent.due, :today?)
   end
 
   test "duplicates child items" do
-    assert(cmd_child)
+    assert(cmd_dup_child)
   end
 
-  test "nests the duplicated child items" do
-    assert_eq(cmd_child.parent_id, cmd_parent.temp_id)
+  test "nests duplicated child items" do
+    assert_eq(cmd_dup_child.parent_id, cmd_dup_parent.temp_id)
   end
 
-  test "checks off the recurring item" do
-    assert(cmd_check)
-    assert_eq(cmd_check.id, i_parent.id)
+  test "keeps labels on duplicated items" do
+    assert_includes(cmd_dup_parent.label_ids, l_other.id)
+    assert_includes(cmd_dup_child.label_ids, l_other.id)
   end
 end

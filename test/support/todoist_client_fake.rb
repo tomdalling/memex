@@ -7,12 +7,14 @@ class TodoistClientFake < Todoist::Client
     @everything = Todoist::Everything.new(
       items: [],
       labels: [],
+      projects: [],
     )
     nil
   end
 
   def run_commands(*commands)
     @captured_commands.concat(commands.flatten)
+    Todoist::CommandBatchResponse.ok(commands.flatten)
   end
 
   ##############################################################################
@@ -24,23 +26,24 @@ class TodoistClientFake < Todoist::Client
   def initialize
     super("faketoken123")
     @captured_commands = []
+    fetch! # start with an empty @everything
   end
 
-  def label!(name)
+  def label!(name = "Some_Label")
     Todoist::Label.new(
       id: next_id,
       name: name,
       color: 30,
       deleted?: false,
       favorite?: false,
-    ).tap { everything.labels << _1 }
+    ).tap { @everything.labels << _1 }
   end
 
-  def item!(content: "Write a test", labels: [], due: nil, parent: nil)
+  def item!(content = "Write a test", labels: [], due: nil, parent: nil, project: nil)
     Todoist::Item.new(
       id: next_id,
       parent_id: parent ? parent.id : nil,
-      project_id: 0,
+      project_id: project_id_for(project) || next_id,
       content: content,
       due: due_for(due),
       label_ids: Array(labels).map { label_id_for(_1) },
@@ -51,12 +54,21 @@ class TodoistClientFake < Todoist::Client
       collapsed?: false,
       added_at: Time.now,
       completed_at: nil,
-    ).tap { everything.items << _1 }
+    ).tap { @everything.items << _1 }
   end
 
-  def find_cmd(attrs)
+  def project!(name = "Some Project")
+    Todoist::Project.new(
+      id: next_id,
+      name: name,
+    ).tap { @everything.projects << _1 }
+  end
+
+  def find_cmd(matchers)
     all_found = captured_commands.select do |cmd|
-      attrs.all? { cmd.public_send(_1) == _2 }
+      matchers.all? do |attr, matcher|
+        matcher === cmd.public_send(attr)
+      end
     end
 
     if all_found.size <= 1
@@ -76,10 +88,10 @@ class TodoistClientFake < Todoist::Client
 
     def due_for(value)
       case value
-      when nil then nil
       when Todoist::Due then value
       when 'today' then Todoist::Due[Date.today.iso8601]
       when String then Todoist::Due[value]
+      when nil then nil
       else fail "Not a Due: #{value.inspect}"
       end
     end
@@ -89,7 +101,8 @@ class TodoistClientFake < Todoist::Client
       when Todoist::Label then value.id
       when Integer then value
       when String then everything.label(name: value).id
-      else fail "Not a label: #{value.inspect}"
+      when nil then nil
+      else fail "Not a Label: #{value.inspect}"
       end
     end
 
@@ -97,7 +110,17 @@ class TodoistClientFake < Todoist::Client
       case value
       when Todoist::Item then value.id
       when Integer then value
-      else fail "Not an item: #{value.inspect}"
+      when nil then nil
+      else fail "Not an Item: #{value.inspect}"
+      end
+    end
+
+    def project_id_for(value)
+      case value
+      when Todoist::Project then value.id
+      when Integer then value
+      when nil then nil
+      else fail "Not a Project: #{value.inspect}"
       end
     end
 end

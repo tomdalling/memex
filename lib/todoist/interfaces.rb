@@ -10,4 +10,10 @@ module Todoist
     end
   end
 
+  module IDecorator
+    def initialize(model, decorated_everything)
+      returns void
+    end
+  end
+
 end

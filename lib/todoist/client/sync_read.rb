@@ -4,7 +4,7 @@ class Todoist::Client
 
     def request
       Request.post('/sync/v8/sync',
-        resource_types: %w(items labels)
+        resource_types: %w(items labels projects)
       )
     end
 

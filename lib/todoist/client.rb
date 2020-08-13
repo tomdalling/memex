@@ -1,20 +1,13 @@
 module Todoist
   class Client
+    extend Forwardable
+
     def initialize(token)
       @token = token
     end
 
-    def items
-      decorate(everything.items)
-    end
-
-    def labels
-      decorate(everything.labels)
-    end
-
-    def label(name_or_attrs)
-      decorate(everything.label(name_or_attrs))
-    end
+    def_delegators :everything,
+      *%i(labels label items item projects project)
 
     def fetch!
       @everything = run_endpoint(SyncRead)
@@ -23,7 +16,7 @@ module Todoist
 
     def everything
       fetch! unless @everything
-      @everything
+      Decorators::Everything.new(@everything)
     end
 
     def run_commands(*commands)
@@ -31,10 +24,6 @@ module Todoist
     end
 
     private
-
-      def decorate(obj)
-        Decorators.decorate(obj, everything)
-      end
 
       def run_endpoint(endpoint, *args, **kwargs, &block)
         request = endpoint.request(*args, **kwargs, &block)
