@@ -5,7 +5,7 @@ context Todo::CLI do
   p_checklists = todoist.project!("Checklists")
 
   # labels
-  l_checklist = todoist.label!("Checklist")
+  l_checklist = todoist.label!("Has_Checklist")
   l_other = todoist.label!("Other label")
 
   # items

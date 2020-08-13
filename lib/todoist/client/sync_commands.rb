@@ -3,6 +3,8 @@ class Todoist::Client
     extend self
 
     def request(commands)
+      raise ArgumentError, "No commands given" if commands.empty?
+
       Request.post('/sync/v8/sync',
         commands: commands.map { serialize_cmd(_1) },
       )

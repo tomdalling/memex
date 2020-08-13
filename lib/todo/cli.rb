@@ -1,9 +1,15 @@
 module Todo::CLI
   class Checklist < Dry::CLI::Command
-    desc "Duplicates recurring checklists that are due today (or overdue), and completes them"
-
-    CHECKLIST_LABEL_NAME = "Checklist"
+    CHECKLIST_LABEL_NAME = "Has_Checklist"
     CHECKLISTS_PROJECT_NAME = "Checklists"
+
+    desc "Duplicates checklists in Todoist"
+    argument :checklist_name, desc: <<~END_DESC.strip.gsub(/\s+/, ' ')
+      The name of the checklist to dupe. Must exist in the
+      \##{CHECKLISTS_PROJECT_NAME} project. If not given, will look for items
+      labelled @#{CHECKLIST_LABEL_NAME} that are due today, complete them, then
+      dupe a checklist with the same name.
+    END_DESC
 
     def initialize(todoist_client: default_todoist_client, stdout: $stdout, stderr: $stderr)
       @stdout = stdout
@@ -11,25 +17,31 @@ module Todo::CLI
       @todoist_client = todoist_client
     end
 
-    def call
-      commands = trigger_items.flat_map do
-        commands_for_trigger(_1)
-      end
+    def call(checklist_name: nil, **)
+      puts "Loading Todoist data..."
+
+      commands =
+        if checklist_name
+          commands_for(checklist_name)
+        else
+          commands_for_autodetected
+        end
 
       if commands.empty?
-        @stdout.puts "Nothing to duplicate"
-      else
-        commands.each do |cmd|
-          type = cmd.class.to_s.split('::').last
-          args = cmd.args.inspect
-          @stdout.puts "#{type}: #{args}"
-        end
+        puts "Nothing to duplicate"
+        return
       end
 
-      @stdout.puts "Running commands..."
+      commands.each do |cmd|
+        type = cmd.class.to_s.split('::').last
+        args = cmd.args.inspect
+        puts "#{type}: #{args}"
+      end
+
+      puts "Running commands..."
       response = @todoist_client.run_commands(commands)
       if response.ok?
-        @stdout.puts "Done!"
+        puts "Done!"
       else
         @stderr.puts "ERROR: " + response.inspect
         exit(1)
@@ -38,36 +50,47 @@ module Todo::CLI
 
     private
 
-      def trigger_items
-        @due_checklist_items ||= @todoist_client.items
-          .select { _1.label?(CHECKLIST_LABEL_NAME) }
-          .select(&:due?)
+      def puts(...)
+        @stdout.puts(...)
       end
 
-      def commands_for_trigger(trigger)
-        [Todoist::Commands::CompleteItem[trigger]] +
-          commands_to_duplicate(
-            checklist_item_for_trigger(trigger),
-            checklist: true,
-          )
-      end
-
-      def checklist_item_for_trigger(trigger_item)
-        item = @todoist_client
-          .project(name: CHECKLISTS_PROJECT_NAME)
-          .item(content: trigger_item.content)
-
-        if item
-          item
+      def commands_for(checklist_name)
+        checklist = find_checklist_by_name(checklist_name)
+        if checklist
+          commands_to_duplicate(checklist, checklist: true)
         else
-          @stderr.puts("Could not find checklist: #{trigger_item.content}")
-          exit(1)
+          @stderr.puts("ERROR: Could not find checklist: #{checklist_name}")
+          []
         end
       end
 
-      def duplicate_checklist(item)
-        @todoist_client.run_commands(
-        )
+      def commands_for_autodetected
+        triggers = @todoist_client.items
+          .select { _1.label?(CHECKLIST_LABEL_NAME) }
+          .select(&:due?)
+
+        triggers.flat_map do |t|
+          dup_commands = commands_for(t.content)
+          if dup_commands.any?
+            dup_commands + [Todoist::Commands::CompleteItem[t]]
+          else
+            []
+          end
+        end
+      end
+
+      def find_checklist_by_name(name)
+        @todoist_client
+          .project(name: CHECKLISTS_PROJECT_NAME)
+          .items
+          .find { fuzzy_match?(_1.content, name) }
+      end
+
+      def fuzzy_match?(str1, str2)
+        [str1, str2]
+          .map(&:downcase)
+          .map { _1.gsub(/[^a-z0-9]+/, '') }
+          .reduce(:==)
       end
 
       def commands_to_duplicate(item, reparent_to_id: item.parent_id, checklist: false)

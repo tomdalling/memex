@@ -10,5 +10,9 @@ module Todoist
     def item(query)
       @everything.item(query, project_id: id)
     end
+
+    def items
+      @everything.items.select { _1.project_id == id }
+    end
   end
 end
