@@ -64,6 +64,17 @@ context DuckCheck do
     end
   end
 
+  context 'with a module' do
+    module Duckable
+      extend SubjectMixin
+      implements IDuck
+    end
+
+    test 'still detects infringements' do
+      refute_empty(subject.infringements(implementor: Duckable))
+    end
+  end
+
   def assert_infringement(message, caller_location: nil)
     caller_location ||= caller_locations.first
 

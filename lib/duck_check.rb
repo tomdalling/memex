@@ -10,7 +10,7 @@ module DuckCheck
   end
 
   def monkey_patch!
-    Class.include(default_registry.class_methods_mixin)
+    Module.include(default_registry.class_methods_mixin)
   end
 
   private
@@ -86,7 +86,7 @@ module DuckCheck
 
     class Record
       value_semantics do
-        implementor Class
+        implementor Module
         interface Module
       end
     end
