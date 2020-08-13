@@ -7,6 +7,7 @@ require 'strscan'
 require 'tempfile'
 require 'yaml'
 require 'securerandom'
+require 'pp'
 
 # require gems
 require 'rubygems'

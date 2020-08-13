@@ -24,6 +24,7 @@ module Todoist
     end
 
     private
+      class ResponseError < StandardError; end
 
       def run_endpoint(endpoint, *args, **kwargs, &block)
         request = endpoint.request(*args, **kwargs, &block)
@@ -33,6 +34,7 @@ module Todoist
           request.params.merge(token: @token),
           request.headers,
         )
+        intercept_response_error(response)
         endpoint.map_response(response)
       end
 
@@ -41,6 +43,12 @@ module Todoist
           _1.request :json
           _1.response :json
           _1.adapter Faraday.default_adapter
+        end
+      end
+
+      def intercept_response_error(response)
+        if response.body.key?('error')
+          raise ResponseError, "Todoist HTTP response:\n" + response.body.pretty_inspect
         end
       end
   end

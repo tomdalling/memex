@@ -1,5 +1,5 @@
 context Todoist::Client do
-  subject = class_under_test.new(Config[:todoist_api_token])
+  subject = class_under_test.new('bf677783696428c88493cdd1ff1ea010092b8e02')
   with_cassette("everything") { subject.fetch! }
 
   test "loads items" do
@@ -46,5 +46,13 @@ context Todoist::Client do
       end
 
     assert_predicate(result, :ok?)
+  end
+
+  test "handles error responses" do
+    assert_raises class_under_test::ResponseError do
+      with_cassette("auth_failed") do
+        subject.fetch!
+      end
+    end
   end
 end

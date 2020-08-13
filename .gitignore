@@ -1,3 +1,4 @@
 data/
 test/vcr_cassettes/
 .fseventsd
+config.yml

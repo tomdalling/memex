@@ -22,7 +22,6 @@ VCR.configure do
   _1.default_cassette_options = {
     match_requests_on: [VCRMatcher],
   }
-  _1.filter_sensitive_data('<todoist_api_token>') { Config[:todoist_api_token] }
 end
 
 RootContext.include(CustomAssertions)
