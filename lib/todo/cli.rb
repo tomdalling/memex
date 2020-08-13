@@ -77,9 +77,6 @@ module Todo::CLI
           parent_id: reparent_to_id,
           project_id: item.project_id,
           due: checklist ? Todoist::Due.today : nil,
-          label_ids: item.labels
-            .reject { _1.name == CHECKLIST_LABEL_NAME }
-            .map(&:id),
         )
         child_cmds = item.children.flat_map do |child|
           commands_to_duplicate(child, reparent_to_id: parent_cmd.temp_id)
