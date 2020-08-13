@@ -1,24 +1,28 @@
-class Todoist::Types::Nilable
-  def self.[](subtype)
-    new(subtype)
-  end
+module Todoist
+  class Types::Nilable
+    implements IType
 
-  def initialize(subtype)
-    @subtype = subtype
-  end
-
-  def validator
-    ->(value) do
-      value == nil || @subtype.validator === value
+    def self.[](subtype)
+      new(subtype)
     end
-  end
 
-  def coercer
-    ->(value) do
-      if value != nil
-        @subtype.coercer.(value)
-      else
-        value
+    def initialize(subtype)
+      @subtype = subtype
+    end
+
+    def validator
+      ->(value) do
+        value == nil || @subtype.validator === value
+      end
+    end
+
+    def coercer
+      ->(value) do
+        if value != nil
+          @subtype.coercer.(value)
+        else
+          value
+        end
       end
     end
   end
