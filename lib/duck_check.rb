@@ -68,6 +68,14 @@ module DuckCheck
             duck_check_registry.implements?(self, interface)
           end
 
+          def class_implements(*interfaces)
+            duck_check_registry.implements(singleton_class, *interfaces)
+          end
+
+          def class_implements?(interface)
+            duck_check_registry.implements?(singleton_class, interface)
+          end
+
           def self.included(base)
             name = "DuckCheck_MonkeyPatch_#{base.duck_check_registry.object_id}"
             base.const_set(name, self)
@@ -81,39 +89,28 @@ module DuckCheck
 
         def infringements_for_record(record)
           record.interface.instance_methods.flat_map do |method_name|
-            infringements_for_method(method_name, record: record)
+            Array(infringements_for_method(method_name, record: record))
           end
         end
 
         def infringements_for_method(method_name, record:)
-          infringement_types_for_method(method_name, record: record).map do |type|
-            Infringement.for(type, method_name, record)
-          end
-        end
-
-        def infringement_types_for_method(method_name, record:)
           unless record.implementor.instance_methods.include?(method_name)
-            return [:not_implemented]
+            return Infringement.not_implemented(method_name, record: record)
           end
 
-          infringement_types = []
+          iface = ParamPipe.for_method(record.interface.instance_method(method_name))
+          impl = ParamPipe.for_method(record.implementor.instance_method(method_name))
+          compat = impl.compatibility_as_substitute_for(iface)
 
-          iface_method = record.interface.instance_method(method_name)
-          impl_method = record.implementor.instance_method(method_name)
-          if iface_method.arity != impl_method.arity
-            infringement_types << :wrong_arity
+          compat.error_messages.map do |msg|
+            Infringement.formatted(
+              message: msg,
+              method_name: method_name,
+              record: record,
+            )
           end
-
-          if takes_block?(iface_method) && !takes_block?(impl_method)
-            infringement_types << :no_block_param
-          end
-
-          infringement_types
         end
 
-        def takes_block?(method)
-          method.parameters.any? { _1.first == :block }
-        end
     end
 
     class Record
@@ -125,13 +122,30 @@ module DuckCheck
 
     class Infringement
       value_semantics do
-        record Record
         message String
+        record Record
       end
 
-      def self.for(type, method_name, record)
+      def self.not_implemented(method_name, record:)
+        formatted(
+          message: "does not implement",
+          method_name: method_name,
+          record: record,
+          include_impl_method: false,
+        )
+      end
+
+      def self.formatted(message:, method_name:, record:, include_impl_method: true)
+        iface = format_method(record.interface.instance_method(method_name))
+        impl =
+          if include_impl_method
+            format_method(record.implementor.instance_method(method_name))
+          else
+            format_implementor(record.implementor)
+          end
+
         new(
-          message: public_send("#{type}_message", method_name, record),
+          message: "#{impl} #{message} #{iface}",
           record: record,
         )
       end
@@ -142,52 +156,24 @@ module DuckCheck
 
       private
 
-        def self.not_implemented_message(method_name, record)
-          f_impl = format_implementor(record.implementor)
-          f_method = format_method(record.interface.instance_method(method_name))
-          "#{f_impl} does not implement #{f_method}"
-        end
-
-        def self.wrong_arity_message(method_name, record)
-          f_impl = format_method(record.implementor.instance_method(method_name))
-          f_iface = format_method(record.interface.instance_method(method_name))
-          "#{f_impl} does not match arity of #{f_iface}"
-        end
-
-        def self.no_block_param_message(method_name, record)
-          f_impl = format_method(record.implementor.instance_method(method_name))
-          f_iface = format_method(record.interface.instance_method(method_name))
-          "#{f_impl} does not take a block like #{f_iface}"
-        end
-
         def self.format_implementor(implementor)
           "`#{implementor}`"
         end
 
         def self.format_method(method)
-          "`#{method.owner}\##{method.name}#{format_param_list(method.parameters)}`"
+          owner = method.owner.name || "<anon>"
+          param_list =
+            if method.arity == 0
+              ''
+            else
+              ParamPipe.for_method(method).to_ruby
+            end
+
+          "`#{owner}\##{method.name}#{param_list}`"
         end
 
-        def self.format_param_list(params)
-          if params.empty?
-            ''
-          else
-            params
-              .map { format_param(*_1) }
-              .join(', ')
-              .then { '(' + _1 + ')' }
-          end
-        end
-
-        def self.format_param(type, name)
-          case type
-          when :req then name.to_s
-          when :rest then "*#{name}"
-          when :block then "&#{name}"
-          when :keyreq then "#{name}:"
-          else "<#{type}>#{name}"
-          end
-        end
+        # def self.format_param_list(params)
+        # end
     end
 
     class NonconformanceError < StandardError

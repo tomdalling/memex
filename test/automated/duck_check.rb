@@ -50,7 +50,7 @@ context DuckCheck do
     class Whale
       extend SubjectMixin
       implements IDuck
-      def eat; end
+      def eat(breakfast, lunch, dinner); end
       def waddle(*locations, speed:); end
     end
 
@@ -64,16 +64,20 @@ context DuckCheck do
       assert_infringement("`Whale` does not implement `IDuck#quack!`")
     end
 
-    test "detects incorrect arity" do
-      assert_infringement("`Whale#eat` does not match arity of `IDuck#eat(food)`")
+    test "detects when implementor does not handle interface params" do
+      assert_infringement(<<~END_MSG.strip.gsub(/\s+/, ' '))
+        `Whale#waddle(*locations, speed:)`
+        does not handle parameters `(&callback)` of
+        `IDuck#waddle(*locations, speed:, &callback)`
+      END_MSG
     end
 
-    test "detects missing block" do
-      assert_infringement(
-        "`Whale#waddle(*locations, speed:)` " +
-        "does not take a block like " +
-        "`IDuck#waddle(*locations, speed:, &callback)`"
-      )
+    test "detects when implementer has extraneous required params" do
+      assert_infringement(<<~END_MSG.strip.gsub(/\s+/, ' '))
+        `Whale#eat(breakfast, lunch, dinner)`
+        has required parameters `(lunch, dinner)` that are not required in
+        `IDuck#eat(food)`
+      END_MSG
     end
   end
 
@@ -95,13 +99,21 @@ context DuckCheck do
 
     class Threeterface
       extend SubjectMixin
-      implements IOne, ITwo, IThree
     end
 
-    test "records interface declarations" do
+    test "records instance-level declarations" do
+      Threeterface.implements(IOne, ITwo, IThree)
       assert_predicate(Threeterface, :implements?, IOne)
       assert_predicate(Threeterface, :implements?, ITwo)
       assert_predicate(Threeterface, :implements?, IThree)
+    end
+
+    test "records class-level declarations" do
+      Threeterface.class_implements(IOne, ITwo)
+      assert_predicate(Threeterface, :class_implements?, IOne)
+      assert_predicate(Threeterface, :class_implements?, ITwo)
+
+      refute_predicate(Threeterface, :class_implements?, IThree)
     end
   end
 
