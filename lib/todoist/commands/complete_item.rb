@@ -1,31 +1,35 @@
 require 'uuid'
 
-class Todoist::Commands::CompleteItem
-  value_semantics do
-    id Either(Integer, UUID)
-    uuid UUID, default_generator: UUID.method(:random)
-  end
+module Todoist
+  class Commands::CompleteItem
+    implements ICommand
 
-  def self.[](item)
-    case item
-    when Integer, UUID
-      new(id: item)
-    when Todoist::Item, Todoist::Decorators::Item
-      new(id: item.id)
-    else
-      fail("Not an item: #{item.inspect}")
+    value_semantics do
+      id Either(Integer, UUID)
+      uuid UUID, default_generator: UUID.method(:random)
     end
-  end
 
-  def type
-    :item_close
-  end
+    def self.[](item)
+      case item
+      when Integer, UUID
+        new(id: item)
+      when Todoist::Item, Todoist::Decorators::Item
+        new(id: item.id)
+      else
+        fail("Not an item: #{item.inspect}")
+      end
+    end
 
-  def args
-    { id: id }
-  end
+    def type
+      :item_close
+    end
 
-  def temp_id
-    nil
+    def args
+      { id: id }
+    end
+
+    def temp_id
+      nil
+    end
   end
 end

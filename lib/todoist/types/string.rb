@@ -1,7 +1,6 @@
 module Todoist
   module Types::String
     implements IType
-
     extend self
 
     def validator

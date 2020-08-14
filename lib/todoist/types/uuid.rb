@@ -1,7 +1,6 @@
 module Todoist
   module Types::UUID
     implements IType
-
     extend self
 
     def validator

@@ -4,7 +4,6 @@ require_relative 'error_details'
 module Todoist
   class CommandBatchResponse
     include JsonSemantics
-
     json_semantics do
       temp_id_mapping Types::HashOf[Types::UUID => Types::Id]
       sync_status Types::HashOf[

@@ -1,5 +1,7 @@
 module Todoist
   class DueDate
+    class_implements IType
+
     def self.validator
       self
     end

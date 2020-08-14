@@ -2,12 +2,12 @@ module Todoist
   class Client
     extend Forwardable
 
+    def_delegators :everything,
+      *%i(labels label items item projects project)
+
     def initialize(token)
       @token = token
     end
-
-    def_delegators :everything,
-      *%i(labels label items item projects project)
 
     def fetch!
       @everything = run_endpoint(SyncRead)

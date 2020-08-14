@@ -1,9 +1,10 @@
-class Todoist::Client
-  module SyncRead
+module Todoist
+  module Client::SyncRead
+    implements IEndpoint
     extend self
 
     def request
-      Request.post('/sync/v8/sync',
+      Client::Request.post('/sync/v8/sync',
         resource_types: %w(items labels projects)
       )
     end

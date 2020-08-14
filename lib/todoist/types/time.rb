@@ -1,7 +1,6 @@
 module Todoist
   module Types::Time
     implements IType
-
     extend self
 
     def validator

@@ -16,4 +16,21 @@ module Todoist
     end
   end
 
+  module IEndpoint
+    # def request(...)
+    #   returns Client::Request
+    # end
+
+    def map_response(response)
+      param response, Faraday::Response
+      returns Object
+    end
+  end
+
+  module ICommand
+    def type
+      returns Symbol
+    end
+  end
+
 end

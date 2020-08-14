@@ -1,45 +1,49 @@
 require 'uuid'
 require 'todoist/due'
 
-class Todoist::Commands::CreateItem
-  NON_ITEM_ATTRS = %i(temp_id uuid)
+module Todoist
+  class Commands::CreateItem
+    implements ICommand
 
-  value_semantics do
-    content String
-    project_id Either(Integer, UUID, nil), default: nil
-    parent_id Either(Integer, UUID, nil), default: nil
-    child_order Either(Integer, nil), default: nil
-    label_ids Either(ArrayOf(Integer), nil), coerce: true, default: nil
-    due Either(Todoist::Due, nil), default: nil # TODO: implement this
+    NON_ITEM_ATTRS = %i(temp_id uuid)
 
-    temp_id Either(UUID, nil), default: nil
-    uuid UUID, default_generator: UUID.method(:random)
-  end
+    value_semantics do
+      content String
+      project_id Either(Integer, UUID, nil), default: nil
+      parent_id Either(Integer, UUID, nil), default: nil
+      child_order Either(Integer, nil), default: nil
+      label_ids Either(ArrayOf(Integer), nil), coerce: true, default: nil
+      due Either(Todoist::Due, nil), default: nil # TODO: implement this
 
-  def self.duplicating(item, **overridden_attrs)
-    attrs = value_semantics.attributes
-      .reject { _1.name.in?(NON_ITEM_ATTRS) }
-      .to_h { [_1.name, item.public_send(_1.name)] }
-      .merge(overridden_attrs)
-
-    new(attrs)
-  end
-
-  def self.coerce_label_ids(label_ids)
-    case label_ids
-    when Set then label_ids.to_a
-    else label_ids
+      temp_id Either(UUID, nil), default: nil
+      uuid UUID, default_generator: UUID.method(:random)
     end
-  end
 
-  def type
-    :item_add
-  end
+    def self.duplicating(item, **overridden_attrs)
+      attrs = value_semantics.attributes
+        .reject { _1.name.in?(NON_ITEM_ATTRS) }
+        .to_h { [_1.name, item.public_send(_1.name)] }
+        .merge(overridden_attrs)
 
-  def args
-    to_h
-      .except(*NON_ITEM_ATTRS)
-      .merge(due: due&.to_command_arg(:date))
-      .compact
+      new(attrs)
+    end
+
+    def self.coerce_label_ids(label_ids)
+      case label_ids
+      when Set then label_ids.to_a
+      else label_ids
+      end
+    end
+
+    def type
+      :item_add
+    end
+
+    def args
+      to_h
+        .except(*NON_ITEM_ATTRS)
+        .merge(due: due&.to_command_arg(:date))
+        .compact
+    end
   end
 end

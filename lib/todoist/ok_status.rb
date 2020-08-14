@@ -1,5 +1,6 @@
 module Todoist
   module OkStatus
+    implements IType
     extend self
 
     def coercer

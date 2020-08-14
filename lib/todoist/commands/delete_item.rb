@@ -1,18 +1,22 @@
-class Todoist::Commands::DeleteItem
-  value_semantics do
-    id Either(Integer, UUID)
-    uuid UUID, default_generator: UUID.method(:random)
-  end
+module Todoist
+  class Commands::DeleteItem
+    implements ICommand
 
-  def type
-    :item_delete
-  end
+    value_semantics do
+      id Either(Integer, UUID)
+      uuid UUID, default_generator: UUID.method(:random)
+    end
 
-  def args
-    { id: id }
-  end
+    def type
+      :item_delete
+    end
 
-  def temp_id
-    nil
+    def args
+      { id: id }
+    end
+
+    def temp_id
+      nil
+    end
   end
 end

@@ -1,5 +1,5 @@
 class Todoist::Client::Request
-  HTTP_METHODS = %i(get post)
+  HTTP_METHODS = %i(get head post put delete connect options trace patch)
 
   value_semantics do
     http_method Either(*HTTP_METHODS)
