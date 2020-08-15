@@ -83,6 +83,7 @@ module Todo::CLI
         @todoist_client
           .project(name: CHECKLISTS_PROJECT_NAME)
           .items
+          .reject(&:subitem?)
           .find { fuzzy_match?(_1.content, name) }
       end
 
