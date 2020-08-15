@@ -17,6 +17,23 @@ module Todoist
       completed_at Types::Nilable[Types::Time], json_key: 'date_completed'
     end
 
+    def self.[](attrs)
+      defaults = {
+        parent_id: nil,
+        content: '',
+        due: nil,
+        label_ids: [],
+        priority: 4,
+        child_order: 0,
+        checked?: false,
+        deleted?: false,
+        collapsed?: false,
+        added_at: Time.now,
+        completed_at: nil,
+      }
+      new(defaults.merge(attrs))
+    end
+
     def scheduled?
       !!due
     end

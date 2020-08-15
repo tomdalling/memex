@@ -56,7 +56,7 @@ context Todo::CLI do
   end
 
   test "keeps labels on duplicated items" do
-    assert_includes(cmd_dup_parent.label_ids, l_other.id)
-    assert_includes(cmd_dup_child.label_ids, l_other.id)
+    assert_includes(cmd_dup_parent.labels, l_other.id)
+    assert_includes(cmd_dup_child.labels, l_other.id)
   end
 end
