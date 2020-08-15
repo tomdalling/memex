@@ -21,17 +21,6 @@ module DuckCheck
         interface Module
       end
     end
-
-    class NonconformanceError < StandardError
-      def self.for_infringements(infringements)
-        new(<<~END_MESSAGE)
-          some implementations do not conform to their declared interfaces
-
-          DuckCheck found the following interface infringements:
-          #{infringements.map { "  - #{_1}" }.join("\n")}
-        END_MESSAGE
-      end
-    end
 end
 
 require_relative 'duck_check/registry'
