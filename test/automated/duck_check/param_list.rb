@@ -1,4 +1,4 @@
-context DuckCheck::ParamPipe do
+context DuckCheck::ParamList do
 
   class ParamCompatibilityFixture
     include TestBench::Fixture
@@ -56,7 +56,7 @@ context DuckCheck::ParamPipe do
     private
 
       def valid_types
-        DuckCheck::ParamPipe::Param::TYPES + [:nothing]
+        DuckCheck::Param::TYPES + [:nothing]
       end
 
       def all_types
@@ -85,12 +85,12 @@ context DuckCheck::ParamPipe do
       end
 
       def param_list_for(obj)
-        if obj.is_a?(DuckCheck::ParamPipe)
+        if obj.is_a?(DuckCheck::ParamList)
           obj
         elsif obj.is_a?(String)
           mod = Module.new
           mod.module_eval("def test(#{obj}); end")
-          DuckCheck::ParamPipe.for_method(mod.instance_method(:test))
+          DuckCheck::ParamList.for_method(mod.instance_method(:test))
         else
           fail "Not a param list: #{obj.inspect}"
         end
