@@ -117,6 +117,24 @@ context DuckCheck do
     end
   end
 
+  context 'ignoring args' do
+    module IIgnored
+      def nocheck(...); end
+    end
+
+    class ManyParams
+      extend SubjectMixin
+      implements IIgnored
+      def nocheck(a, b=1, *c, d:, e:1, **f, &g); end
+    end
+
+    test "does not check compatibility when interface params are (...)" do
+      refute_raises DuckCheck::NonconformanceError do
+        subject.check!(ManyParams)
+      end
+    end
+  end
+
   def assert_infringement(message, caller_location: nil)
     caller_location ||= caller_locations.first
 

@@ -73,16 +73,18 @@ module DuckCheck
 
       def infringements_for_record(record)
         record.interface.instance_methods.flat_map do |method_name|
-          Array(infringements_for_method(method_name, record: record))
+          infringements_for_method(method_name, record: record)
         end
       end
 
       def infringements_for_method(method_name, record:)
         unless record.implementor.instance_methods.include?(method_name)
-          return Infringement.not_implemented(method_name, record: record)
+          return [Infringement.not_implemented(method_name, record: record)]
         end
 
         iface = ParamList.for_method(record.interface.instance_method(method_name))
+        return [] if iface.allow_anything?
+
         impl = ParamList.for_method(record.implementor.instance_method(method_name))
         compat = impl.compatibility_as_substitute_for(iface)
 

@@ -11,6 +11,14 @@ module DuckCheck
       new(type: parameter[0], name: parameter[1])
     end
 
+    TYPES.each do |type|
+      eval <<~END_METHOD
+        def self.#{type}(name)
+          new(type: :#{type}, name: name)
+        end
+      END_METHOD
+    end
+
     def type?(*types)
       types.include?(type)
     end

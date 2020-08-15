@@ -14,6 +14,11 @@ module DuckCheck
       @params = params
     end
 
+    def allow_anything?
+      # these two params are how Ruby represents (...) args
+      @params == [Param.rest(:*), Param.block(:&)]
+    end
+
     def dup
       self.class.new(@params.dup)
     end

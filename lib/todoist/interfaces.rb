@@ -17,9 +17,9 @@ module Todoist
   end
 
   module IEndpoint
-    # def request(...)
-    #   returns Client::Request
-    # end
+    def request(...)
+      returns Client::Request
+    end
 
     def map_response(response)
       param response, Faraday::Response
