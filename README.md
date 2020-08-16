@@ -67,3 +67,9 @@ Memex
  - [X] `bin/memex run` mounts, runs a script, then ejects
  - [X] auto-updates itself from the master copy inside the encrypted volume
 
+Tests
+-----
+
+Use `bin/test` as a stand-in for the `bench` command. In test.vim:
+
+    let test#ruby#testbench#executable = 'bin/test'
