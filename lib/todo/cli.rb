@@ -1,20 +1,23 @@
 module Todo::CLI
   class Checklist < Dry::CLI::Command
-    CHECKLIST_LABEL_NAME = "Has_Checklist"
-    CHECKLISTS_PROJECT_NAME = "Checklists"
-
     desc "Duplicates checklists in Todoist"
     argument :checklist_name, desc: <<~END_DESC.strip.gsub(/\s+/, ' ')
-      The name of the checklist to dupe. Must exist in the
-      \##{CHECKLISTS_PROJECT_NAME} project. If not given, will look for items
-      labelled @#{CHECKLIST_LABEL_NAME} that are due today, complete them, then
-      dupe a checklist with the same name.
+      The name of the checklist to dupe. Must exist as a root item in the
+      master checklists project project. If not given, will look for items with
+      a trigger label that are due today, complete them, then dupe a checklist
+      with the same name.
     END_DESC
 
-    def initialize(todoist_client: default_todoist_client, stdout: $stdout, stderr: $stderr)
+    def initialize(
+      todoist_client: nil,
+      todoist_config: nil,
+      stdout: $stdout,
+      stderr: $stderr
+    )
       @stdout = stdout
       @stderr = stderr
-      @todoist_client = todoist_client
+      @todoist_config = todoist_config || Config.todoist
+      @todoist_client = todoist_client || Todoist::Client.new(@todoist_config.api_token)
     end
 
     def call(checklist_name: nil, **)
@@ -66,7 +69,7 @@ module Todo::CLI
 
       def commands_for_autodetected
         triggers = @todoist_client.items
-          .select { _1.label?(CHECKLIST_LABEL_NAME) }
+          .select { _1.label?(trigger_label) }
           .select(&:due?)
 
         triggers.flat_map do |t|
@@ -80,9 +83,7 @@ module Todo::CLI
       end
 
       def find_checklist_by_name(name)
-        @todoist_client
-          .project(name: CHECKLISTS_PROJECT_NAME)
-          .items
+        master_checklists_project.items
           .reject(&:subitem?)
           .find { fuzzy_match?(_1.content, name) }
       end
@@ -99,7 +100,7 @@ module Todo::CLI
           temp_id: UUID.random,
           content: item.content + (checklist ? ' (Checklist)' : ''),
           parent_id: reparent_to_id,
-          project_id: item.project_id,
+          project_id: project_for_active_checklists.id,
           due: checklist ? Todoist::Due.today : nil,
         )
         child_cmds = item.children.flat_map do |child|
@@ -109,8 +110,32 @@ module Todo::CLI
         [parent_cmd, *child_cmds]
       end
 
-      def default_todoist_client
-        Todoist::Client.new(Config.todoist.api_token)
+      def trigger_label
+        @todoist_client.label(@todoist_config.checklist_trigger_label).tap do |label|
+          if label.nil?
+            raise "Trigger label not found: #{@todoist_config.checklist_trigger_label}"
+          end
+        end
+      end
+
+      def master_checklists_project
+        @todoist_client.projects.find do
+          fuzzy_match?(_1.name, @todoist_config.master_checklists_project)
+        end.tap do |proj|
+          if proj.nil?
+            raise "Master checklists project not found: #{@todoist_config.master_checklists_project}"
+          end
+        end
+      end
+
+      def project_for_active_checklists
+        @todoist_client.projects.find do
+          fuzzy_match?(_1.name, @todoist_config.active_checklists_project)
+        end.tap do |proj|
+          if proj.nil?
+            raise "Project for active checklists not found: #{@todoist_config.active_checklists_project}"
+          end
+        end
       end
   end
 

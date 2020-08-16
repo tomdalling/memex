@@ -7,9 +7,15 @@ module Todoist
       @everything = everything
     end
 
-    def label?(label_name)
-      label = @everything.label(name: label_name)
-      label_ids.include?(label.id)
+    def label?(label)
+      label_id =
+        case label
+        when String then @everything.label(name: label_name).id
+        when Integer then label
+        else label.id
+        end
+
+      label_ids.include?(label_id)
     end
 
     def labels

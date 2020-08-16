@@ -1,21 +1,29 @@
 context Todo::CLI do
   todoist = TodoistClientFake.new
+  config = Config::TodoistConfig.new(
+    api_token: 'fakepi_token_more_like_it',
+    master_checklists_project: 'Master Checklists',
+    active_checklists_project: 'Active Checklists',
+    checklist_trigger_label: 'Triggo',
+  )
 
   # projects
-  p_checklists = todoist.project!("Checklists")
+  p_checklists = todoist.project!("! Master Checklists")
+  p_actives = todoist.project!("! Active Checklists")
 
   # labels
-  l_checklist = todoist.label!("Has_Checklist")
+  l_trigger = todoist.label!("Triggo")
   l_other = todoist.label!("Other label")
 
   # items
-  i_recurring = todoist.item!("Stuff", labels: l_checklist, due: 'today')
+  i_recurring = todoist.item!("Stuff", labels: l_trigger, due: 'today')
   i_checklist = todoist.item!("Stuff", project: p_checklists, labels: l_other)
   i_child = todoist.item!("Substuff", parent: i_checklist, labels: l_other)
 
   # run CLI
   subject = Todo::CLI::Checklist.new(
     todoist_client: todoist,
+    todoist_config: config,
     stdout: StringIO.new,
     stderr: StringIO.new,
   )
@@ -39,8 +47,8 @@ context Todo::CLI do
     assert_eq(cmd_dup_parent.content, "Stuff (Checklist)")
   end
 
-  test "keeps the project_id of the duplicated checklist" do
-    assert_eq(cmd_dup_parent.project_id, i_checklist.project_id)
+  test "moves the duplicated items to the 'active checklists' project" do
+    assert_eq(cmd_dup_parent.project_id, p_actives.id)
   end
 
   test "makes the duplicated checklist due today" do
