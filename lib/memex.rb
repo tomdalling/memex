@@ -9,20 +9,16 @@ module Memex
     Config.memex.volume_path
   end
 
-  def data_dir
-    volume_root_dir / "data"
-  end
-
   def zettel_dir
-    data_dir / "zettel"
+    volume_root_dir / "zettel"
   end
 
   def journal_dir
-    data_dir / "journal"
+    volume_root_dir / "journal"
   end
 
   def wiki_dir
-    data_dir / "wiki"
+    volume_root_dir / "wiki"
   end
 
   def self.sh(*args)

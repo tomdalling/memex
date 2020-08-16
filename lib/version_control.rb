@@ -2,7 +2,7 @@ module VersionControl
   extend self
 
   def commit(message: nil)
-    Dir.chdir(Memex.data_dir)
+    Dir.chdir(Memex.volume_root_dir)
 
     Memex.sh('git add --all')
     if changes.empty?
