@@ -1,16 +1,26 @@
 #!/bin/bash
 
-# Allows file to be overwritten while running.
-# See https://stackoverflow.com/questions/2285403/how-to-make-shell-scripts-robust-to-source-being-changed-as-they-run/2358432#2358432
-{
+# TODO: this should not need to be bash anymore. convert it to ruby
 
 set -ueo pipefail
 IFS=$'\n\t'
 
+BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+PROJECT_ROOT="$(dirname "$BIN_DIR")"
 PROG_NAME=$(basename $0)
-BUNDLE_PATH="$HOME/Dropbox/memex.sparsebundle"
-VOLUME_PATH="/Volumes/Memex"
 CHRUBY_SCRIPT="/usr/local/share/chruby/chruby.sh"
+
+read_config() {
+  cd "$PROJECT_ROOT"
+  ruby -ryaml -e "print YAML.safe_load(File.read('config.yml')).dig(*ARGV)" "$@"
+}
+
+expand_tilde() {
+  echo -n "${1/#\~/$HOME}"
+}
+
+BUNDLE_PATH="$(expand_tilde "$(read_config memex image_path)")"
+VOLUME_PATH="$(read_config memex volume_path)"
 
 NOCOLOR='\033[0m'
 RED='\033[0;31m'
@@ -45,16 +55,15 @@ sub_help(){
   # Use this script for accessing binaries inside the memex
     echoc "${C_CODE}Usage: $PROG_NAME <subcommand> [options]"
     echo  ""
-    echo  "Take this script out of the memex volume and put it in your path. It"
-    echo  "will mount/eject the volume for you. Also add aliases like:"
+    echo  "Consider adding these aliases to your bashrc:"
     echo  ""
+    echo  "    alias memex='~/path/to/bin/memex'"
     echo  "    alias journal='memex run journal'"
     echo  "    alias zettel='memex run zettel'"
     echo  ""
     echo  "Subcommands:"
     echoc "    ${C_CODE}mount"
-    echo  "        Mounts the memex volume. Also autoupdates this script with"
-    echo  "        the version in the memex volume."
+    echo  "        Mounts the memex volume."
     echoc "    ${C_CODE}eject"
     echo  "        Unmounts the memex volume, after commiting the data directory"
     echo  "        using 'bin/version_control commit'."
@@ -97,17 +106,8 @@ pretty_run() {
   fi
 }
 
-autoupdate(){
-  copy_path="$0"
-  source_path="$VOLUME_PATH/bin/memex"
-
-  if ! cmp --silent "$copy_path" "$source_path" ; then
-    pretty_run --silent "Auto-update" cp "$source_path" "$copy_path"
-  fi
-}
-
 run_bin(){
-  cd "$VOLUME_PATH"
+  cd "$PROJECT_ROOT"
   boot_ruby
 
   script=${1-none}
@@ -134,12 +134,10 @@ sub_mount(){
   else
     echoc "$(linetype "?") Memex already mounted at ${C_PATH}${VOLUME_PATH}"
   fi
-  autoupdate
 }
 
 sub_eject(){
   run_bin version_control commit
-  cd "$HOME"
   pretty_run --silent Eject hdiutil detach "$(hdiutil info | grep "${VOLUME_PATH}" | cut -d$'\t' -f 1)"
 }
 
@@ -171,9 +169,4 @@ case $subcommand in
         fi
         ;;
 esac
-
-# Allows file to be overwritten while running.
-# See https://stackoverflow.com/questions/2285403/how-to-make-shell-scripts-robust-to-source-being-changed-as-they-run/2358432#2358432
-exit
-}
 
