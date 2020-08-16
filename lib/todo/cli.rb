@@ -110,7 +110,7 @@ module Todo::CLI
       end
 
       def default_todoist_client
-        Todoist::Client.new(Config[:todoist_api_token])
+        Todoist::Client.new(Config.todoist.api_token)
       end
   end
 

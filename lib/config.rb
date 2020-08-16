@@ -1,23 +1,53 @@
 class Config
-  value_semantics do
-    todoist_api_token Either(String, nil), default: nil
-    memex_image_path Pathname, coerce: Pathname.method(:new)
-    memex_volume_name String, default: 'Memex'
-  end
+  class TodoistConfig
+    value_semantics do
+      api_token String
+      master_checklists_project String
+      active_checklists_project String
+      checklist_trigger_label String
+    end
 
-  def self.[](attr)
-    instance.public_send(attr)
-  end
-
-  def self.instance
-    @instance ||= begin
-      yml = Memex::CONFIG_PATH.read
-      attrs = YAML.safe_load(yml, symbolize_names: true)
-      new(attrs)
+    # TODO: remove this once it is implementd upstream
+    def self.coerce(value)
+      if value.is_a?(Hash)
+        new(value)
+      else
+        value
+      end
     end
   end
 
-  def memex_volume_path
-    Pathname('/Volumes') / memex_volume_name
+  class MemexConfig
+    value_semantics do
+      image_path Pathname, coerce: Pathname.method(:new)
+      volume_path Pathname, coerce: Pathname.method(:new)
+    end
+
+    # TODO: remove this once it is implementd upstream
+    def self.coerce(value)
+      if value.is_a?(Hash)
+        new(value)
+      else
+        value
+      end
+    end
+  end
+
+  value_semantics do
+    memex MemexConfig, coerce: MemexConfig.method(:coerce)
+    todoist Either(TodoistConfig, nil), coerce: TodoistConfig.method(:coerce)
+  end
+
+  class << self
+    extend Forwardable
+    def_delegators :instance, *%i(memex todoist)
+
+    def instance
+      @instance ||= begin
+        yml = Memex::CONFIG_PATH.read
+        attrs = YAML.safe_load(yml, symbolize_names: true)
+        new(attrs)
+      end
+    end
   end
 end

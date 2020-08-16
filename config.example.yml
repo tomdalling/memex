@@ -1,3 +1,8 @@
-memex_image_path: '~/Dropbox/memex.sparsebundle'
-memex_volume_name: 'Memex'
-todoist_api_token: null
+memex:
+  image_path: '~/Dropbox/memex.sparsebundle'
+  volume_path: '/Volumes/Memex'
+todoist:
+  api_token: 'aaabbbbccccc'
+  master_checklists_project: 'Checklists'
+  active_checklists_project: 'Inbox'
+  checklist_trigger_label: 'Has_Checklist'
