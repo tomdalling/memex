@@ -53,7 +53,6 @@ module Todoist
         if element
           element
         else
-          byebug
           type = collection_name.to_s.capitalize.chomp('s')
           fail "#{type} not found for #{search_attrs.inspect}"
         end
