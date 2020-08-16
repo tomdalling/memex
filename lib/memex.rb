@@ -1,12 +1,29 @@
 module Memex
   ROOT_DIR = Pathname.new(__dir__).parent.freeze
-  VIM_RUNTIME_DIR = ROOT_DIR / "config"
   CONFIG_PATH = ROOT_DIR / 'config.yml'
+  VIM_RUNTIME_DIR = ROOT_DIR / "config"
 
-  DATA_DIR = ROOT_DIR / "data"
-  ZETTEL_DIR = DATA_DIR / "zettel"
-  JOURNAL_DIR = DATA_DIR / "journal"
-  WIKI_DIR = DATA_DIR / "wiki"
+  extend self
+
+  def volume_root_dir
+    Config.memex.volume_path
+  end
+
+  def data_dir
+    volume_root_dir / "data"
+  end
+
+  def zettel_dir
+    data_dir / "zettel"
+  end
+
+  def journal_dir
+    data_dir / "journal"
+  end
+
+  def wiki_dir
+    data_dir / "wiki"
+  end
 
   def self.sh(*args)
     parts = args.select { _1.is_a?(String) }

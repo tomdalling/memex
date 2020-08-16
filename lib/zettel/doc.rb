@@ -6,7 +6,7 @@ class Zettel::Doc
 
   IDENTIFIER_CHARS = ('a'..'z').to_a + ('0'..'9').to_a
   EXTENSION = ".md"
-  SEARCH_DIR = Memex::ZETTEL_DIR
+  SEARCH_DIR = Memex.zettel_dir
 
   def self.[](id)
     path = (SEARCH_DIR / id).sub_ext(EXTENSION)

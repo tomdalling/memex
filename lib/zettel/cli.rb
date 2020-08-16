@@ -1,6 +1,6 @@
 module Zettel::CLI
   def self.run_editor(*args)
-    chdir = Memex::ZETTEL_DIR
+    chdir = Memex.zettel_dir
     relative_args = args.map do
       if _1.is_a?(Pathname)
         _1.relative_path_from(chdir).to_path

@@ -16,7 +16,7 @@ module VersionControl::CLI
     def call(args: [])
       paths =
         if args.empty?
-          Dir.chdir(Memex::DATA_DIR)
+          Dir.chdir(Memex.data_dir)
           Memex.sh('git add --all')
           VersionControl.changes.map{ Pathname(_1.path) }.select(&:file?)
         else

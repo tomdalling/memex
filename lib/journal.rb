@@ -2,7 +2,7 @@ module Journal
   extend self
 
   def edit_date(date)
-    path = Memex::JOURNAL_DIR / date.strftime('%F.md')
+    path = Memex.journal_dir / date.strftime('%F.md')
     title = date.strftime('%A, %-d %B %Y')
     template = <<~END_TEMPLATE
       #{title}
@@ -19,7 +19,7 @@ module Journal
       ENV.fetch('EDITOR', 'nvim'),
       '-c', 'normal G$',
       '--', path.to_path,
-      chdir: Memex::JOURNAL_DIR,
+      chdir: Memex.journal_dir,
     )
 
     if path.exist? && path.read.strip == template.strip
