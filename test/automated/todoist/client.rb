@@ -1,5 +1,5 @@
 context Todoist::Client do
-  subject = class_under_test.new('bf677783696428c88493cdd1ff1ea010092b8e02')
+  subject = class_under_test.new(Config.todoist.api_token)
   with_cassette("everything") { subject.fetch! }
 
   test "loads items" do
@@ -49,9 +49,11 @@ context Todoist::Client do
   end
 
   test "handles error responses" do
+    client = class_under_test.new('badapikey3235253')
+
     assert_raises class_under_test::ResponseError do
       with_cassette("auth_failed") do
-        subject.fetch!
+        client.fetch!
       end
     end
   end
