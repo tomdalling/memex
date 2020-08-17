@@ -142,7 +142,13 @@ sub_eject(){
 }
 
 sub_run(){
-  if [ ! -d "$VOLUME_PATH" ] ; then
+  should_mount="true"
+  if [[ ${1-} == "--no-mount" ]] ; then
+    should_mount="false"
+    shift
+  fi
+
+  if [ "$should_mount" == "true" ] && [ ! -d "$VOLUME_PATH" ] ; then
     did_mount="true"
     sub_mount
   fi
