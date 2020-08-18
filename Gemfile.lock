@@ -16,7 +16,7 @@ GEM
     test_bench (1.2.0.0)
       test_bench-fixture (>= 1.0.0.0)
     test_bench-fixture (1.2.2.0)
-    value_semantics (3.4.0)
+    value_semantics (3.5.0)
     vcr (6.0.0)
 
 PLATFORMS

@@ -3,7 +3,7 @@ module Todoist
     implements IType
     extend self
 
-    def coercer
+    def json_coercer
       ->(value) do
         if value == "ok"
           self

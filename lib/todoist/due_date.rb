@@ -6,7 +6,7 @@ module Todoist
       self
     end
 
-    def self.coercer
+    def self.json_coercer
       ->(value) do
         if value.is_a?(String) && Date._iso8601(value).any?
           new(value)

@@ -29,7 +29,7 @@ module Todoist
       self
     end
 
-    def self.coercer
+    def self.json_coercer
       ->(value) do
         if value.is_a?(Integer)
           new(value)

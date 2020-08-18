@@ -6,7 +6,7 @@ context JsonSemantics do
       ValueSemantics::Bool
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         case value
         when 1 then true
@@ -50,9 +50,9 @@ context JsonSemantics do
     assert_eq(Person.new(awake?: 0).awake?, false)
   end
 
-  test "exposes a hash coercer on the class" do
+  test "exposes a JSON object coercer on the class" do
     assert_eq(
-      Person.coercer.call({ 'is_awake' => true }),
+      Person.json_coercer.call({ 'is_awake' => true }),
       Person.new(awake?: true),
     )
 

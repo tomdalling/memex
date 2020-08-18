@@ -6,15 +6,6 @@ class Config
       active_checklists_project String
       checklist_trigger_label String
     end
-
-    # TODO: remove this once it is implementd upstream
-    def self.coerce(value)
-      if value.is_a?(Hash)
-        new(value)
-      else
-        value
-      end
-    end
   end
 
   class MemexConfig
@@ -22,20 +13,11 @@ class Config
       image_path Pathname, coerce: Pathname.method(:new)
       volume_path Pathname, coerce: Pathname.method(:new)
     end
-
-    # TODO: remove this once it is implementd upstream
-    def self.coerce(value)
-      if value.is_a?(Hash)
-        new(value)
-      else
-        value
-      end
-    end
   end
 
   value_semantics do
-    memex MemexConfig, coerce: MemexConfig.method(:coerce)
-    todoist Either(TodoistConfig, nil), coerce: TodoistConfig.method(:coerce)
+    memex MemexConfig, coerce: MemexConfig.coercer
+    todoist Either(TodoistConfig, nil), coerce: TodoistConfig.coercer
   end
 
   class << self

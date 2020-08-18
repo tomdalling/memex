@@ -17,10 +17,10 @@ module Todoist
       end
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         if value.is_a?(Array)
-          value.map { @subtype.coercer.(_1) }
+          value.map { @subtype.json_coercer.(_1) }
         else
           value
         end

@@ -19,7 +19,7 @@ module JsonSemantics
     def json_semantics(&block)
       dsl = DSL.new
       dsl.instance_eval(&block)
-      const_set(:JSON_ATTRS, dsl.attrs)
+      const_set(:JSON_ATTRS, dsl.dsl_attrs)
       include dsl.baked_module
     end
 
@@ -31,18 +31,18 @@ module JsonSemantics
       )
     end
 
-    def coercer
-      ->(json) do
-        if json.is_a?(Hash)
-          from_json(json)
+    def json_coercer
+      ->(obj) do
+        if Hash === obj
+          from_json(obj)
         else
-          json
+          obj
         end
       end
     end
 
     def to_proc
-      coercer
+      json_coercer
     end
 
     def validator
@@ -55,20 +55,20 @@ module JsonSemantics
   end
 
   class DSL
-    attr_reader :attrs
+    attr_reader :dsl_attrs
 
     def initialize
-      @attrs = []
+      @dsl_attrs = []
     end
 
     def def_attr(name, type, json_key: name)
-      @attrs << Attr.new(name: name, type: type, json_key: json_key)
+      @dsl_attrs << Attr.new(name: name, type: type, json_key: json_key)
     end
 
     def baked_module
       ValueSemantics.bake_module(
         ValueSemantics::Recipe.new(
-          attributes: @attrs.map(&:to_value_semantics_attribute),
+          attributes: @dsl_attrs.map(&:to_value_semantics_attribute),
         )
       )
     end
@@ -96,7 +96,7 @@ module JsonSemantics
         ValueSemantics::Attribute.new(
           name: name,
           validator: type.validator,
-          coercer: type.coercer,
+          coercer: type.json_coercer,
         )
       end
 

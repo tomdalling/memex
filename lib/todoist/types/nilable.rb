@@ -16,10 +16,10 @@ module Todoist
       end
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         if value != nil
-          @subtype.coercer.(value)
+          @subtype.json_coercer.(value)
         else
           value
         end

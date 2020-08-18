@@ -10,7 +10,7 @@ module Todoist
       ->(value) { VALID_VALUES.include?(value) }
     end
 
-    def coercer
+    def json_coercer
       :itself.to_proc
     end
   end

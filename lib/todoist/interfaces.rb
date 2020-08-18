@@ -5,7 +5,7 @@ module Todoist
       returns #===(other)
     end
 
-    def coercer
+    def json_coercer
       returns #call(value)
     end
   end

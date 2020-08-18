@@ -7,7 +7,7 @@ module Todoist
       ::Time
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         if value.is_a?(String) && Date._iso8601(value).any?
           Time.iso8601(value)

@@ -7,7 +7,7 @@ module Todoist
       ::String
     end
 
-    def coercer
+    def json_coercer
       :itself.to_proc
     end
   end

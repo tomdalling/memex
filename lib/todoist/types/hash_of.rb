@@ -23,11 +23,11 @@ module Todoist
       end
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         if value.is_a?(Hash)
           value.to_h do
-            [@key_type.coercer.(_1), @value_type.coercer.(_2)]
+            [@key_type.json_coercer.(_1), @value_type.json_coercer.(_2)]
           end
         else
           value

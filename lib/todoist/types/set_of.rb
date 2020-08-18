@@ -17,11 +17,11 @@ module Todoist
       end
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         if value.is_a?(Enumerable)
           Set.new(
-            value.map { @subtype.coercer.(_1) }
+            value.map { @subtype.json_coercer.(_1) }
           )
         else
           value

@@ -16,13 +16,13 @@ module Todoist
       end
     end
 
-    def coercer
+    def json_coercer
       method(:coerce)
     end
 
     def coerce(value)
       @valid_types.each do |type|
-        coerced_value = type.coercer.(value)
+        coerced_value = type.json_coercer.(value)
         if type.validator === coerced_value
           return coerced_value
         end

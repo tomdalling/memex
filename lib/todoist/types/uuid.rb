@@ -7,7 +7,7 @@ module Todoist
       ::UUID
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         if value.is_a?(String) && UUID.valid_format?(value)
           ::UUID.new(formatted: value)

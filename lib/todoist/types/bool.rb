@@ -8,7 +8,7 @@ module Todoist
       ValueSemantics::Bool
     end
 
-    def coercer
+    def json_coercer
       ->(value) do
         case value
         when 1 then true
