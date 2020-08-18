@@ -17,7 +17,7 @@ module VersionControl
       .map(&:path)
       .select(&:file?)
       .select { _1.extname == ".md" }
-    cloud = word_cloud(changed_paths)
+    cloud = diff_word_cloud
 
     if changes.size == 1
       ch = changes.first
@@ -42,6 +42,18 @@ module VersionControl
     end
   end
 
+  def changed_text
+    @changed_text ||= begin
+      diff = Memex.sh("git diff --cached --patch --unified=0")
+      DiffParser.parse(diff)
+        .flat_map { _1.hunks }
+        .flat_map { _1.lines }
+        .select(&:added?)
+        .map(&:text)
+        .join(' ')
+    end
+  end
+
   # Sort words in selection: !ruby -e "puts STDIN.read.split.map(&:strip).uniq.sort.join(' ')"
   COMMON_WORDS = Set.new(%w(
     a about actually after again all also am an and any are around as at back
@@ -56,17 +68,17 @@ module VersionControl
 
   GIT_COMMIT_MESSAGE_BODY_WIDTH = 72
 
-  def most_frequent_words(file_paths)
+  def most_frequent_words(text)
     # NOTE: this could easily be optimised if needed
-    file_paths
-      .flat_map { File.read(_1).split(/(\s|[\[\]()])+/) }
-      .map(&:downcase)
-      .select { _1.match?(/[a-z]/) }
-      .reject { _1.match?(/[a-z0-9]{3}\.md/) }
-      .map { _1.tr('’“”', "'\"\"") }
-      .map { strip_regex(_1, /[.,?:"_*~()\[\]]+/) }
-      .reject { COMMON_WORDS.include?(_1) }
-      .select { _1.length >= 2 }
+    text
+      .split(/(\s|[\[\]()])+/) # split on either whitespace or brackets
+      .map(&:downcase) # case insensitive
+      .select { _1.match?(/[a-z]/) } # reject stuff with no letters in it
+      .reject { _1.match?(/[a-z0-9]{3}\.md/) } # reject things that look like paths
+      .map { _1.tr('’“”', "'\"\"") } # replace fancy quotes with ASCII ones
+      .map { strip_regex(_1, /[.,?:"_*~()\[\]]+/) } # strip crap off of every word
+      .reject { COMMON_WORDS.include?(_1) } # reject common words
+      .select { _1.length >= 2 } # reject single-letter words
       .tally
       .sort_by(&:last)
       .last(30)
@@ -74,8 +86,8 @@ module VersionControl
       .to_h
   end
 
-  def word_cloud(file_paths)
-    words = most_frequent_words(file_paths).keys
+  def diff_word_cloud
+    words = most_frequent_words(changed_text).keys
     return "No markdown changes detected" if words.empty?
 
     lines = ["Most common words:"]

@@ -1,9 +1,7 @@
 context VersionControl do
   context ".most_frequent_words" do
-    def most_frequent_words(file_content)
-      with_tempfile(content: file_content) do |path|
-        VersionControl.most_frequent_words([path])
-      end
+    def most_frequent_words(text)
+      VersionControl.most_frequent_words(text)
     end
 
     test "counts the words used" do
@@ -72,9 +70,9 @@ context VersionControl do
   context '.word_cloud' do
     # word1 word2 word2 word3 word3 word3 ... word40
     input = (1..40).map { Array.new(_1, "word#{_1}").join(' ') }.join("\n")
-    word_cloud = with_tempfile(content: input) do |path|
-      VersionControl.word_cloud([path])
-    end
+    # this is a hack because I was too lazy to do DI
+    VersionControl.instance_variable_set(:@changed_text, input)
+    word_cloud = VersionControl.diff_word_cloud
 
     test "includes the words in the file" do
       assert_includes(word_cloud, 'word40', 'word39', 'word11')

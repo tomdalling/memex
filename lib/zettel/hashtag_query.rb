@@ -105,7 +105,7 @@ class Zettel::HashtagQuery
         # @returns [Regexp] A pattern for matching the token strings
         def pattern; end
 
-        # Builds a token from a string that matches PATTERN
+        # Builds a token from a string that matches `#pattern`
         #
         # @returns [IToken] the token
         def token_for(match); end
