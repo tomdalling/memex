@@ -108,12 +108,12 @@ context DuckCheck do
       assert_predicate(Threeterface, :implements?, IThree)
     end
 
-    test "records class-level declarations" do
-      Threeterface.class_implements(IOne, ITwo)
-      assert_predicate(Threeterface, :class_implements?, IOne)
-      assert_predicate(Threeterface, :class_implements?, ITwo)
+    test "records self-implementation declarations" do
+      Threeterface.self_implements(IOne, ITwo)
+      assert_predicate(Threeterface, :self_implements?, IOne)
+      assert_predicate(Threeterface, :self_implements?, ITwo)
 
-      refute_predicate(Threeterface, :class_implements?, IThree)
+      refute_predicate(Threeterface, :self_implements?, IThree)
     end
   end
 
@@ -133,6 +133,18 @@ context DuckCheck do
         subject.check!(ManyParams)
       end
     end
+  end
+
+  test 'can be queried for all implementors of an interface' do
+    module IAlphabet; end;
+    class ImplA; extend SubjectMixin; self_implements IAlphabet; end
+    class ImplB; extend SubjectMixin; self_implements IAlphabet; end
+    class ImplC; extend SubjectMixin; self_implements IAlphabet; end
+
+    impls = subject.self_implementors_of(IAlphabet)
+    assert(impls[0].equal?(ImplA))
+    assert(impls[1].equal?(ImplB))
+    assert(impls[2].equal?(ImplC))
   end
 
   def assert_infringement(message, caller_location: nil)

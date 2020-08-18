@@ -1,6 +1,6 @@
 module Todoist
   class Color
-    class_implements IType
+    self_implements IType
 
     CSS_VALUES = {
       30 => '#b8256f',

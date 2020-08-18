@@ -6,18 +6,24 @@ module DuckCheck
       @records = []
     end
 
-    def implements(implementor, *interfaces)
+    def implements(implementor, *interfaces, zelf: nil)
       records.concat(
         interfaces.map do
-          Record.new(interface: _1, implementor: implementor)
+          Record.new(interface: _1, implementor: implementor, zelf: zelf)
         end
       )
     end
 
-    def implements?(implementor, interface)
-      records.any? do
-        _1.interface.equal?(interface) && _1.implementor.equal?(implementor)
-      end
+    def implements?(implementor, interface, zelf: nil)
+      records.include?(
+        Record.new(implementor: implementor, interface: interface, zelf: zelf)
+      )
+    end
+
+    def self_implementors_of(interface)
+      records
+        .select { _1.zelf && _1.interface.equal?(interface) }
+        .map(&:zelf)
     end
 
     def check!(implementor = nil)
@@ -52,12 +58,12 @@ module DuckCheck
           duck_check_registry.implements?(self, interface)
         end
 
-        def class_implements(*interfaces)
-          duck_check_registry.implements(singleton_class, *interfaces)
+        def self_implements(*interfaces)
+          duck_check_registry.implements(singleton_class, *interfaces, zelf: self)
         end
 
-        def class_implements?(interface)
-          duck_check_registry.implements?(singleton_class, interface)
+        def self_implements?(interface)
+          duck_check_registry.implements?(singleton_class, interface, zelf: self)
         end
 
         def self.included(base)

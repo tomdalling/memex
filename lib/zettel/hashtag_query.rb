@@ -76,22 +76,55 @@ class Zettel::HashtagQuery
       PREC_UNARY = 2
 
       def self.next(scanner)
-        builder =
-          [Hashtag, And, Or, Not, OpenParen, CloseParen]
-            .find { scanner.match?(_1::PATTERN) }
+        builder = DuckCheck.self_implementors_of(ITokenBuilder).find do
+          scanner.match?(_1.pattern)
+        end
 
         if builder
-          match = scanner.scan(builder::PATTERN)
-          builder.for(match)
+          match = scanner.scan(builder.pattern)
+          builder.token_for(match)
         else
           raise Parser::Error, "Unrecognised token at: #{scanner.rest}"
         end
       end
 
-      class Hashtag
-        PATTERN = Zettel::Doc::HASHTAG_REGEX_IGNORING_PRECEDING
+      module IToken
+        # @returns [String] A developer-readable representation of the token
+        def inspect; end
+      end
 
-        def self.for(match)
+      module IAstBuilder
+        # Incorporates the token into the given parser AST node stack by
+        # mutating it.
+        #
+        # @param stack [Array[INode]] The parser AST node stack
+        def build_node!(stack); end
+      end
+
+      module ITokenBuilder
+        # @returns [Regexp] A pattern for matching the token strings
+        def pattern; end
+
+        # Builds a token from a string that matches PATTERN
+        #
+        # @returns [IToken] the token
+        def token_for(match); end
+      end
+
+      module IOperator
+        # @returns [Integer] a number representing relative operator precedence
+        def precedence; end
+      end
+
+      class Hashtag
+        self_implements ITokenBuilder
+        implements IToken, IAstBuilder
+
+        def self.pattern
+          Zettel::Doc::HASHTAG_REGEX_IGNORING_PRECEDING
+        end
+
+        def self.token_for(match)
           new(name: match.delete_prefix('#'))
         end
 
@@ -109,10 +142,15 @@ class Zettel::HashtagQuery
       end
 
       module Not
-        PATTERN = /!|not/i
-
         extend self
-        def for(_); self; end
+        self_implements ITokenBuilder
+        implements IToken, IAstBuilder, IOperator
+
+        def pattern
+          /!|not/i
+        end
+
+        def token_for(_); self; end
 
         def precedence
           PREC_UNARY
@@ -129,10 +167,15 @@ class Zettel::HashtagQuery
       end
 
       module And
-        PATTERN = /&&?|and/i
-
         extend self
-        def for(_); self; end
+        self_implements ITokenBuilder
+        implements IToken, IAstBuilder, IOperator
+
+        def pattern
+          /&&?|and/i
+        end
+
+        def token_for(_); self; end
 
         def precedence
           PREC_BINARY
@@ -150,10 +193,15 @@ class Zettel::HashtagQuery
       end
 
       module Or
-        PATTERN = /\|\|?|or/i
-
         extend self
-        def for(_); self; end
+        self_implements ITokenBuilder
+        implements IToken, IAstBuilder, IOperator
+
+        def pattern
+          /\|\|?|or/i
+        end
+
+        def token_for(_); self; end
 
         def precedence
           PREC_BINARY
@@ -171,14 +219,19 @@ class Zettel::HashtagQuery
       end
 
       module OpenParen
-        PATTERN = '('
+        extend self
+        self_implements ITokenBuilder
+        implements IToken, IOperator
+
+        def pattern
+          /\(/
+        end
+
+        def token_for(_); self; end
 
         def precedence
           PREC_NONE
         end
-
-        extend self
-        def for(_); self; end
 
         def inspect
           'Token[(]'
@@ -186,10 +239,17 @@ class Zettel::HashtagQuery
       end
 
       module CloseParen
-        PATTERN = ')'
-
         extend self
-        def for(_); self; end
+        # not IOperator, because it doesn't act like one. It has special
+        # behaviour in the tokenizer.
+        self_implements ITokenBuilder
+        implements IToken
+
+        def pattern
+          /\)/
+        end
+
+        def token_for(_); self; end
 
         def inspect
           'Token[)]'
@@ -198,7 +258,18 @@ class Zettel::HashtagQuery
     end
 
     module AST
+      module INode
+        # @param hashtag_set [Enumerable] a collection of hashtag names
+        # @returns [Boolean]
+        def match?(hashtag_set); end
+
+        # @returns [String] a human-readable representation of the node
+        def to_s; end
+      end
+
       class Hashtag
+        implements INode
+
         value_semantics do
           name String
         end
@@ -213,8 +284,10 @@ class Zettel::HashtagQuery
       end
 
       class Not
+        implements INode
+
         value_semantics do
-          subnode # Node
+          subnode # INode
         end
 
         def match?(set)
@@ -227,8 +300,10 @@ class Zettel::HashtagQuery
       end
 
       class And
+        implements INode
+
         value_semantics do
-          subnodes Array # Of(Node)
+          subnodes Array # Of(INode)
         end
 
         def match?(set)
@@ -241,8 +316,10 @@ class Zettel::HashtagQuery
       end
 
       class Or
+        implements INode
+
         value_semantics do
-          subnodes Array # Of(Node)
+          subnodes Array # Of(INode)
         end
 
         def match?(set)

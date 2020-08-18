@@ -3,7 +3,7 @@ module DuckCheck
 
   extend Forwardable
   def_delegators :default_registry,
-    *%i(implements check! infringements)
+    *%i(implements check! infringements self_implementors_of)
 
   def default_registry
     @default_registry ||= Registry.new
@@ -19,6 +19,7 @@ module DuckCheck
       value_semantics do
         implementor Module
         interface Module
+        zelf Either(Module, nil), default: nil
       end
     end
 end
