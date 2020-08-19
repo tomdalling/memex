@@ -26,4 +26,3 @@ VCR.configure do
 end
 
 RootContext.include(CustomAssertions)
-RootContext.activate!

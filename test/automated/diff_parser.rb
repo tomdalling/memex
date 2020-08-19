@@ -1,4 +1,4 @@
-context DiffParser do
+RootContext.context DiffParser do
   test "parses diffs" do
     actual = DiffParser.parse(<<~END_DIFF)
       diff --git a/builtin-http-fetch.c b/http-fetch.c

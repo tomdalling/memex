@@ -6,6 +6,7 @@ gem 'addressable'
 gem 'value_semantics'
 gem 'faraday'
 gem 'faraday_middleware'
+gem 'zeitwerk'
 
 # testing
 gem 'test_bench'

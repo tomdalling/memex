@@ -1,4 +1,4 @@
-context DuckCheck::NonconformanceError do
+RootContext.context DuckCheck::NonconformanceError do
   subject = class_under_test.for_infringements([
     "wigwam",
     "wozzle",

@@ -14,14 +14,17 @@ require 'rubygems'
 require 'bundler/setup'
 Bundler.require(:default)
 
+# setup zetwork loader
+Zeitwerk::Loader.new.tap do |loader|
+  loader.inflector.inflect(
+    'cli' => 'CLI',
+    'uuid' => 'UUID',
+  )
+  loader.push_dir(__dir__)
+  loader.setup # ready!
+end
+
 # boot stuff that the codebase expects to be globally available
 ValueSemantics.monkey_patch!
 require_relative 'core_ext'
-require_relative 'duck_check'
 DuckCheck.monkey_patch!
-
-# load the rest of the codebase
-$LOAD_PATH.unshift(__dir__) unless $LOAD_PATH.include?(__dir__)
-Dir["#{__dir__}/**/*.rb"].sort.each do |path|
-  require path unless path == __FILE__
-end

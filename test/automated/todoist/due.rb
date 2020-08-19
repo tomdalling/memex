@@ -1,4 +1,4 @@
-context Todoist::Due do
+RootContext.context Todoist::Due do
   context "with fixed date" do
     subject = class_under_test['2000-01-02T03:04:05Z']
 

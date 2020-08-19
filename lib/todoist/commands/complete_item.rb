@@ -1,5 +1,3 @@
-require 'uuid'
-
 module Todoist
   class Commands::CompleteItem
     implements ICommand

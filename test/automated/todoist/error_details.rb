@@ -1,4 +1,4 @@
-context Todoist::ErrorDetails do
+RootContext.context Todoist::ErrorDetails do
   subject = class_under_test.from_json(
     "error_code" => 15,
     "error" => "Invalid temporary id",

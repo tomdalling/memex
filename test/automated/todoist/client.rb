@@ -1,4 +1,4 @@
-context Todoist::Client do
+RootContext.context Todoist::Client do
   subject = class_under_test.new(Config.todoist.api_token)
   with_cassette("everything") { subject.fetch! }
 

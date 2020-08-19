@@ -1,6 +1,3 @@
-require 'uuid'
-require 'todoist/due'
-
 module Todoist
   class Commands::CreateItem
     implements ICommand

@@ -1,5 +1,3 @@
-require_relative 'color'
-
 module Todoist
   class Label
     include JsonSemantics

@@ -1,4 +1,4 @@
-context Todoist::Color do
+RootContext.context Todoist::Color do
   subject = class_under_test.new(30)
 
   test "has a number" do

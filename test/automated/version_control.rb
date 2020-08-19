@@ -1,4 +1,4 @@
-context VersionControl do
+RootContext.context VersionControl do
   context ".most_frequent_words" do
     def most_frequent_words(text)
       VersionControl.most_frequent_words(text)

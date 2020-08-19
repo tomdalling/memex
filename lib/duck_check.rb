@@ -23,5 +23,3 @@ module DuckCheck
       end
     end
 end
-
-require_relative 'duck_check/registry'

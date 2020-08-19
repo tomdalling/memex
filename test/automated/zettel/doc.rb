@@ -1,4 +1,4 @@
-context Zettel::Doc do
+RootContext.context Zettel::Doc do
   def subject(filename="in_memory_test_zettel.md", content: typical_zettel_content)
     class_under_test.new(filename, content: content)
   end

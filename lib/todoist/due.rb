@@ -1,5 +1,3 @@
-require_relative 'due_date'
-
 module Todoist
   class Due
     include JsonSemantics

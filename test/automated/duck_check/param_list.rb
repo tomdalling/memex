@@ -1,4 +1,4 @@
-context DuckCheck::ParamList do
+RootContext.context DuckCheck::ParamList do
 
   class ParamCompatibilityFixture
     include TestBench::Fixture

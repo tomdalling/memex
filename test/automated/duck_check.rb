@@ -1,4 +1,4 @@
-context DuckCheck do
+RootContext.context DuckCheck do
   subject = DuckCheck::Registry.new
   # this is a hack only needed for test isolation
   SubjectMixin = subject.class_methods_mixin

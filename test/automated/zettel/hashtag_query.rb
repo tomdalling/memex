@@ -1,4 +1,4 @@
-context Zettel::HashtagQuery do
+RootContext.context Zettel::HashtagQuery do
   def with_subject(query_string)
     context "with syntax: #{query_string}" do
       subject = class_under_test.parse(query_string)

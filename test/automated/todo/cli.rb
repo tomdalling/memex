@@ -1,4 +1,4 @@
-context Todo::CLI do
+RootContext.context Todo::CLI do
   todoist = TodoistClientFake.new
   config = Config::TodoistConfig.new(
     api_token: 'fakepi_token_more_like_it',

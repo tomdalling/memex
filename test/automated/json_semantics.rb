@@ -1,4 +1,4 @@
-context JsonSemantics do
+RootContext.context JsonSemantics do
   module BoolType
     extend self
 

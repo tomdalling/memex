@@ -1,4 +1,4 @@
-context Todoist::Commands::CreateItem do
+RootContext.context Todoist::Commands::CreateItem do
   test "turns an item into the correct API command JSON" do
     item = Todoist::Item[
       id: 99999,

@@ -1,4 +1,4 @@
-context Zettel::CLI::List do
+RootContext.context Zettel::CLI::List do
   def subject
     class_under_test.new(
       zettel_repo: ZettelRepoFake.new,

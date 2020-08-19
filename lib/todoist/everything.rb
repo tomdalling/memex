@@ -1,7 +1,3 @@
-require_relative 'item'
-require_relative 'label'
-require_relative 'project'
-
 module Todoist
   class Everything
     include JsonSemantics

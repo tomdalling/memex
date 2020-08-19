@@ -1,6 +1,3 @@
-require_relative 'ok_status'
-require_relative 'error_details'
-
 module Todoist
   class CommandBatchResponse
     include JsonSemantics

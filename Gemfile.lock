@@ -18,6 +18,7 @@ GEM
     test_bench-fixture (1.2.2.0)
     value_semantics (3.5.0)
     vcr (6.0.0)
+    zeitwerk (2.4.0)
 
 PLATFORMS
   ruby
@@ -31,6 +32,7 @@ DEPENDENCIES
   test_bench
   value_semantics
   vcr
+  zeitwerk
 
 BUNDLED WITH
    2.1.4

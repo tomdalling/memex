@@ -3,15 +3,10 @@
 class RootContext
   include TestBench::Fixture
 
-  # install the `context` method into the global scope
-  def self.activate!
-    GLOBAL_SCOPE_BINDING.eval <<~END_METHOD
-      def context(*args, **kwargs, &block)
-        TestBench.context(*args, **kwargs) do
-          fixture(#{name}, args.first, block).run_deferred!
-        end
-      end
-    END_METHOD
+  def self.context(*args, **kwargs, &block)
+    TestBench.context(*args, **kwargs) do
+      fixture(RootContext, args.first, block).run_deferred!
+    end
   end
 
   # equivalent of `described_class` from RSpec
