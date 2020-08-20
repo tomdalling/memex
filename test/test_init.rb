@@ -7,6 +7,7 @@ TEST_ROOT_DIR = Pathname(__dir__)
 TEST_SUPPORT_DIR = TEST_ROOT_DIR / 'support'
 TEST_CASSETTE_DIR = TEST_ROOT_DIR / 'vcr_cassettes'
 TEST_TMP_DIR = TEST_ROOT_DIR / "tmp"
+TEST_DATA_DIR = TEST_ROOT_DIR / "data"
 
 [TEST_TMP_DIR, TEST_CASSETTE_DIR].each do
   _1.mkdir unless _1.exist?

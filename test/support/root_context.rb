@@ -27,7 +27,15 @@ class RootContext
     if context_arg.is_a?(Class)
       context_arg
     else
-      fail("Context was not a class: #{context_arg.inspect}")
+      fail("Context was not a Class: #{context_arg.inspect}")
+    end
+  end
+
+  def module_under_test
+    if context_arg.is_a?(Module)
+      context_arg
+    else
+      fail("Context was not a Module: #{context_arg.inspect}")
     end
   end
 

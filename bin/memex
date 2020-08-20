@@ -11,8 +11,10 @@ PROG_NAME=$(basename $0)
 CHRUBY_SCRIPT="/usr/local/share/chruby/chruby.sh"
 
 read_config() {
-  cd "$PROJECT_ROOT"
-  ruby -ryaml -e "print YAML.safe_load(File.read('config.yml')).dig(*ARGV)" "$@"
+  (
+    cd "$PROJECT_ROOT" &&
+    ruby -ryaml -e "print YAML.safe_load(File.read('config.yml')).dig(*ARGV)" "$@"
+  )
 }
 
 expand_tilde() {
@@ -107,18 +109,17 @@ pretty_run() {
 }
 
 run_bin(){
-  cd "$PROJECT_ROOT"
   boot_ruby
 
   script=${1-none}
   shift
-  pretty_run Run "bin/${script}" "$@"
+  pretty_run Run "${BIN_DIR}/${script}" "$@"
 }
 
 boot_ruby(){
   # if chruby exists and it's not already loaded
   if [[ -r "$CHRUBY_SCRIPT" ]] && [[ -z "${CHRUBY_VERSION-}" ]] ; then
-    ruby_version="$(cat .ruby-version)"
+    ruby_version="$(cat "$PROJECT_ROOT/.ruby-version")"
 
     # these scripts don't work in -u mode
     set +u

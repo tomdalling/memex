@@ -8,6 +8,9 @@ require 'tempfile'
 require 'yaml'
 require 'securerandom'
 require 'pp'
+require 'pathname'
+
+ENV['BUNDLE_GEMFILE'] ||= Pathname(__dir__).parent.join('Gemfile').to_path
 
 # require gems
 require 'rubygems'
