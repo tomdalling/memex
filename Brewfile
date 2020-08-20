@@ -1,0 +1,2 @@
+brew "tika"
+brew "pandoc"
