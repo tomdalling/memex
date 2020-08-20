@@ -229,13 +229,13 @@ RootContext.context DuckCheck::ParamList do
       parameter: 'a:',
       compatible_with: {
         keyreq: 'a:',
+        keyrest: '**kwargs',
       },
       incompatible_with: {
         req: 'a',
         opt: 'a = 1',
         rest: '*a',
         key: 'a: 1',
-        keyrest: '**a',
         block: '&a',
         nothing: '',
       },

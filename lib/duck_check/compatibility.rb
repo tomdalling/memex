@@ -89,7 +89,7 @@ module DuckCheck
       end
 
       def eliminate_keyrest(sub)
-        original.delete(original.params_of_type(:key, :keyrest))
+        original.delete(original.params_of_type(:key, :keyreq, :keyrest))
         true
       end
 
