@@ -3,24 +3,6 @@ module Memex
   CONFIG_PATH = ROOT_DIR / 'config.yml'
   VIM_RUNTIME_DIR = ROOT_DIR / "config"
 
-  extend self
-
-  def volume_root_dir
-    Config.memex.volume_path
-  end
-
-  def zettel_dir
-    volume_root_dir / "zettel"
-  end
-
-  def journal_dir
-    volume_root_dir / "journal"
-  end
-
-  def wiki_dir
-    volume_root_dir / "wiki"
-  end
-
   def self.sh(*args)
     parts = args.select { _1.is_a?(String) }
     pretty_cmd = parts.size > 1 ? Shellwords.join(parts) : parts.first

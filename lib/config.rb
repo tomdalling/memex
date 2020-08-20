@@ -32,4 +32,24 @@ class Config
       end
     end
   end
+
+  def volume_root_dir
+    memex.volume_path
+  end
+
+  def reference_dir
+    volume_root_dir / "ref"
+  end
+
+  def zettel_dir
+    volume_root_dir / "zettel"
+  end
+
+  def journal_dir
+    volume_root_dir / "journal"
+  end
+
+  def wiki_dir
+    volume_root_dir / "wiki"
+  end
 end

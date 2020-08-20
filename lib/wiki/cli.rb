@@ -11,7 +11,7 @@ module Wiki::CLI
     ]
 
     def call(page:, **)
-      path = (Memex.wiki_dir / page).sub_ext('.md')
+      path = (Config.instance.wiki_dir / page).sub_ext('.md')
       unless path.exist?
         path.write(template(page), mode: 'wx') # never overwrite
       end
@@ -20,7 +20,7 @@ module Wiki::CLI
         ENV.fetch('EDITOR', 'nvim'),
         '-c', 'normal }',
         '--', path.to_path,
-        chdir: Memex.wiki_dir,
+        chdir: Config.instance.wiki_dir,
       )
     end
 
@@ -43,7 +43,7 @@ module Wiki::CLI
     example 'export seinfeld_episodes'
 
     def call(page:, args: [])
-      path = (Memex.wiki_dir / page).sub_ext('.md')
+      path = (Config.instance.wiki_dir / page).sub_ext('.md')
       cmd = [
         'pandoc',
         '--from', 'markdown_github+yaml_metadata_block+header_attributes+gfm_auto_identifiers',
