@@ -19,11 +19,23 @@ class FileSystemFake
   end
 
   def exists?(path)
-    @files.key?(to_path(path))
+    !!@files[to_path(path)]
   end
 
   def copy(src, dest)
     @files[to_path(dest)] = @files[to_path(src)]
+  end
+
+  def children_of(directory_path)
+    @files
+      .keys
+      .select { exists?(_1) }
+      .map { Pathname(_1) }
+      .select { _1.parent == directory_path }
+  end
+
+  def delete(path)
+    @files.delete(to_path(path)) or fail("Path does not exist: #{path}")
   end
 
   ######################################################################
