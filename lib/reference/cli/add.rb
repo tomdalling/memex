@@ -1,7 +1,7 @@
 module Reference
   class CLI::Add < Dry::CLI::Command
     desc "Ingests files into the reference section of the memex"
-    option :interactive, type: :bool, desc: "Prompt for metadata interactively"
+    option :interactive, type: :boolean, default: true, desc: "Prompt for metadata interactively"
     option :tags, type: :array, desc: "The 'tags' metadata value"
     option :author, type: :string, desc: "The 'author' metadata value"
     option :notes, type: :string, desc: "The 'notes' metadata value"
@@ -24,6 +24,7 @@ module Reference
     def call(
       files:,
       interactive: true,
+      args: [],
       **metadata_options
     )
       files.map{ Pathname(_1) }.each do |input_path|
@@ -70,19 +71,12 @@ module Reference
       end
 
       def generate_ref_path(ext, dated)
-        date_str = (dated || @now.().to_date).iso8601
-        (1..).each do |suffix|
-          basename = "#{date_str}_#{suffix.to_s.rjust(3, '0')}"
-          unless basename_exists?(basename)
-            return @config.reference_dir.join(basename).sub_ext(ext)
-          end
-        end
-      end
-
-      def basename_exists?(basename)
-        @file_system.children_of(@config.reference_dir).any? do
-          _1.basename.to_s.start_with?(basename)
-        end
+        base_path = Reference.unused_document_base_path(
+          dated || @now.().to_date,
+          file_system: @file_system,
+          config: @config,
+        )
+        base_path.sub_ext(ext)
       end
 
       def write_metadata(ref_path, metadata)
