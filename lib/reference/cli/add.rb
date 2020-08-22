@@ -60,17 +60,17 @@ module Reference
       end
 
       def add_document(input_path, metadata)
-        generate_ref_path(input_path.extname).tap do |ref_path|
+        generate_ref_path(input_path.extname, metadata.dated).tap do |ref_path|
           @file_system.copy(input_path, ref_path)
           write_metadata(ref_path, metadata)
           write_fulltext(ref_path)
         end
       end
 
-      def generate_ref_path(ext)
-        date = @now.().to_date.iso8601
+      def generate_ref_path(ext, dated)
+        date_str = (dated || @now.().to_date).iso8601
         (1..).each do |suffix|
-          basename = "#{date}_#{suffix.to_s.rjust(3, '0')}"
+          basename = "#{date_str}_#{suffix.to_s.rjust(3, '0')}"
           unless basename_exists?(basename)
             return @config.reference_dir.join(basename).sub_ext(ext)
           end

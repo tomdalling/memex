@@ -8,22 +8,25 @@ RootContext.context Reference::CLI::Add do
   subject = class_under_test.new(
     file_system: fs,
     config: Struct.new(:reference_dir).new(Pathname('/ref')),
-    now: ->() { Time.iso8601('2020-12-25T09:00:00+10:00') },
+    now: ->() { Time.iso8601('2222-02-22T09:00:00+10:00') },
     fulltext_extractor: ->(path:, file_system:) { 'full text here' },
     stdout: stdout,
     interactive_metadata: ->(path:, noninteractive_metadata:) do
-      noninteractive_metadata.with(notes: 'my notes')
+      noninteractive_metadata.with(
+        notes: 'my notes',
+        dated: Date.new(2020, 12, 25),
+      )
     end
   )
 
   subject.call(files: ["/in/greetings.txt"], tags: %w(a b c))
 
-  test "does not affect existing ref files" do
-    assert_eq(fs.read('/ref/2020-12-25_001.png'), 'filename taken')
+  test "generates a unique filename based on the `dated` metadata" do
+    assert_eq(fs.read('/ref/2020-12-25_002.txt'), 'hello')
   end
 
-  test "generates a unique filename based on the time and existing files" do
-    assert_eq(fs.read('/ref/2020-12-25_002.txt'), 'hello')
+  test "does not affect existing ref files" do
+    assert_eq(fs.read('/ref/2020-12-25_001.png'), 'filename taken')
   end
 
   test "extracts full text into a sidecar file" do
@@ -46,7 +49,7 @@ RootContext.context Reference::CLI::Add do
     )
 
     test "includes `added_at`" do
-      assert_eq(metadata.added_at, Time.iso8601('2020-12-25T09:00:00+10:00'))
+      assert_eq(metadata.added_at, Time.iso8601('2222-02-22T09:00:00+10:00'))
     end
 
     test "includes `original_filename`" do
@@ -58,6 +61,7 @@ RootContext.context Reference::CLI::Add do
     end
 
     test "includes the result of interactive metadata" do
+      assert_eq(metadata.dated, Date.new(2020, 12, 25))
       assert_eq(metadata.notes, "my notes")
     end
   end
