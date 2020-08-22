@@ -9,7 +9,6 @@ RootContext.context Reference::CLI::Add do
     file_system: fs,
     config: Struct.new(:reference_dir).new(Pathname('/ref')),
     now: ->() { Time.iso8601('2222-02-22T09:00:00+10:00') },
-    fulltext_extractor: ->(path:, file_system:) { 'full text here' },
     stdout: stdout,
     interactive_metadata: ->(path:, noninteractive_metadata:) do
       noninteractive_metadata.with(
@@ -27,10 +26,6 @@ RootContext.context Reference::CLI::Add do
 
   test "does not affect existing ref files" do
     assert_eq(fs.read('/ref/2020-12-25_001.png'), 'filename taken')
-  end
-
-  test "extracts full text into a sidecar file" do
-    assert_eq(fs.read('/ref/2020-12-25_002.fulltext.txt'), 'full text here')
   end
 
   test "writes metadata into a separate file" do

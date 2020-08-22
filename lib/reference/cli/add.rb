@@ -9,14 +9,12 @@ module Reference
       file_system: FileSystem,
       config: Config.instance,
       now: Time.method(:now),
-      fulltext_extractor: FulltextExtractor,
       interactive_metadata: nil,
       stdout: $stdout
     )
       @file_system = file_system
       @config = config
       @now = now
-      @fulltext_extractor = fulltext_extractor
       @stdout = stdout
       @interactive_metadata = interactive_metadata || InteractiveMetadata.new(stdout: stdout)
     end
@@ -63,7 +61,6 @@ module Reference
         generate_ref_path(input_path.extname, metadata.dated).tap do |ref_path|
           @file_system.copy(input_path, ref_path)
           write_metadata(ref_path, metadata)
-          write_fulltext(ref_path)
         end
       end
 
@@ -85,13 +82,6 @@ module Reference
 
       def write_metadata(ref_path, metadata)
         @file_system.write(ref_path.sub_ext('.metadata.yml'), metadata.to_yaml)
-      end
-
-      def write_fulltext(ref_path)
-        @file_system.write(
-          ref_path.sub_ext('.fulltext.txt'),
-          @fulltext_extractor.(path: ref_path, file_system: @file_system),
-        )
       end
   end
 end
