@@ -5,13 +5,18 @@ RootContext.context Reference::InteractiveMetadata do
   subject = class_under_test.new(stdin: stdin, stdout: stdout)
   result = subject.(
     path: '/whatever.txt',
-    noninteractive_metadata: Reference::Metadata.new(original_filename: 'whatever.txt'),
+    noninteractive_metadata: Reference::Metadata.new(
+      original_filename: 'whatever.txt',
+      author: 'Tesla',
+      tags: %w(orig1 orig2),
+      notes: 'blah blah',
+    ),
   )
 
   test "asks for a bunch of stuff" do
     assert_eq(stdout.string, <<~END_OUTPUT.chomp("\n"))
       ==[ /whatever.txt ]========================================================
-        Dated:   Author:   Notes:   Tags: 
+        Dated:   Author (Tesla):   Notes (blah blah):   Tags (#orig1 #orig2): 
     END_OUTPUT
   end
 
