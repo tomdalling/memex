@@ -1,8 +1,10 @@
 module Reference
   class CLI::Add < Dry::CLI::Command
     desc "Ingests files into the reference section of the memex"
-    option :tags, type: :array, desc: "Tags to apply to the file"
     option :interactive, type: :bool, desc: "Prompt for metadata interactively"
+    option :tags, type: :array, desc: "The 'tags' metadata value"
+    option :author, type: :string, desc: "The 'author' metadata value"
+    option :notes, type: :string, desc: "The 'notes' metadata value"
     argument :files, type: :array, required: true, desc: "The files to ingest"
 
     def initialize(
@@ -19,12 +21,16 @@ module Reference
       @interactive_metadata = interactive_metadata || InteractiveMetadata.new(stdout: stdout)
     end
 
-    def call(files:, tags: nil, interactive: true)
+    def call(
+      files:,
+      interactive: true,
+      **metadata_options
+    )
       files.map{ Pathname(_1) }.each do |input_path|
         metadata = metadata_for(
           original_path: input_path,
-          tags: tags,
           interactive: interactive,
+          metadata_options: metadata_options,
         )
         ref_path = add_document(input_path, metadata)
         puts ">>> Ingested \"#{ref_path}\" from \"#{input_path}\""
@@ -40,12 +46,11 @@ module Reference
         @stdout.puts(...)
       end
 
-      def metadata_for(original_path:, tags:, interactive:)
+      def metadata_for(original_path:, interactive:, metadata_options:)
         noninteractive = Metadata.new(
           added_at: @now.(),
           original_filename: original_path.basename.to_s,
-          tags: tags,
-        )
+        ).with(metadata_options)
 
         if interactive
           @interactive_metadata.(

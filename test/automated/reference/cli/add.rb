@@ -12,13 +12,17 @@ RootContext.context Reference::CLI::Add do
     stdout: stdout,
     interactive_metadata: ->(path:, noninteractive_metadata:) do
       noninteractive_metadata.with(
-        notes: 'my notes',
         dated: Date.new(2020, 12, 25),
       )
     end
   )
 
-  subject.call(files: ["/in/greetings.txt"], tags: %w(a b c))
+  subject.call(
+    files: ["/in/greetings.txt"],
+    tags: %w(a b c),
+    author: 'Einstein',
+    notes: 'my notes',
+  )
 
   test "generates a unique filename based on the `dated` metadata" do
     assert_eq(fs.read('/ref/2020-12-25_002.txt'), 'hello')
@@ -55,9 +59,16 @@ RootContext.context Reference::CLI::Add do
       assert_eq(metadata.tags, %w(a b c))
     end
 
+    test "includes `author`" do
+      assert_eq(metadata.author, 'Einstein')
+    end
+
+    test "includes `notes`" do
+      assert_eq(metadata.notes, 'my notes')
+    end
+
     test "includes the result of interactive metadata" do
       assert_eq(metadata.dated, Date.new(2020, 12, 25))
-      assert_eq(metadata.notes, "my notes")
     end
   end
 end
