@@ -7,6 +7,7 @@ gem 'value_semantics'
 gem 'faraday'
 gem 'faraday_middleware'
 gem 'zeitwerk'
+gem 'io-like'
 
 # testing
 gem 'test_bench'

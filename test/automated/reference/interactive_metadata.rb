@@ -1,8 +1,7 @@
 RootContext.context Reference::InteractiveMetadata do
-  stdin = StringIO.new("2222-02-22\nMe\nnotesss\n#t1 #t2\n")
-  stdout = StringIO.new
+  transcript = TrioTranscript.new(stdin: "2222-02-22\nMe\nnotesss\n#t1 #t2\n")
+  subject = class_under_test.new(**transcript.duo)
 
-  subject = class_under_test.new(stdin: stdin, stdout: stdout)
   result = subject.(
     path: '/whatever.txt',
     noninteractive_metadata: Reference::Metadata.new(
@@ -13,11 +12,14 @@ RootContext.context Reference::InteractiveMetadata do
     ),
   )
 
-  test "asks for a bunch of stuff" do
-    assert_eq(stdout.string, <<~END_OUTPUT.chomp("\n"))
+  test "prompts for input from stdin" do
+    assert_eq(transcript.to_s, <<~END_TRANSCRIPT)
       ==[ /whatever.txt ]========================================================
-        Dated:   Author (Tesla):   Notes (blah blah):   Tags (#orig1 #orig2): 
-    END_OUTPUT
+        Dated: 2222-02-22
+        Author (Tesla): Me
+        Notes (blah blah): notesss
+        Tags (#orig1 #orig2): #t1 #t2
+    END_TRANSCRIPT
   end
 
   test "includes dated in the results" do
