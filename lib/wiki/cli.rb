@@ -47,7 +47,6 @@ module Wiki::CLI
       cmd = [
         'pandoc',
         '--from', 'markdown_github+yaml_metadata_block+header_attributes+gfm_auto_identifiers',
-        '--table-of-contents',
         '--self-contained',
         '--css', (Memex::ROOT_DIR / 'vendor/tufte-css/tufte.min.css').to_path,
         *args,
