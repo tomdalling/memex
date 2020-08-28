@@ -45,7 +45,7 @@ C_CODE="${BLUE}"
 C_PATH="${LIGHTGRAY}"
 
 echoc() {
-  echo -e $@ "${NOCOLOR}"
+  echo -e "$@" "${NOCOLOR}"
 }
 
 linetype() {
@@ -89,7 +89,7 @@ pretty_run() {
   if [[ "$silent" == true ]] ; then
     # single line output
     echoc -n "$(linetype "=") ${prefix}: ${C_CODE}$@${NOCOLOR} ... "
-    eval "$@" > /dev/null
+    "$@" > /dev/null
     if [[ $? == 0 ]] ; then
       echoc "${GREEN}ok"
     else
@@ -99,7 +99,7 @@ pretty_run() {
   else
     # multi-line output
     echoc "$(linetype ">") ${prefix}: ${C_CODE}$@${NOCOLOR}"
-    if eval "$@" ; then
+    if $@ ; then
       echoc "$(linetype "<") ${GREEN}ok"
     else
       echoc "$(linetype "<") ${RED}FAILED"
@@ -154,7 +154,7 @@ sub_run(){
     sub_mount
   fi
 
-  run_bin $@
+  run_bin "$@"
 
   if [ "${did_mount-}" == true ] ; then
     sub_eject
@@ -168,7 +168,7 @@ case $subcommand in
         ;;
     *)
         shift
-        sub_${subcommand} $@
+        sub_${subcommand} "$@"
         if [ $? = 127 ]; then
             echo "Error: '$subcommand' is not a known subcommand." >&2
             echo "       Run '$PROG_NAME --help' for a list of known subcommands." >&2
