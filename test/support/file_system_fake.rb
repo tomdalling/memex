@@ -3,6 +3,15 @@ class FileSystemFake
 
   def initialize(files = {})
     @files = files.to_h { [to_path(_1), _2] }
+    @original_files = @files.dup
+  end
+
+  def find(regex)
+    @files.keys.find { regex === _1 }
+  end
+
+  def reset!
+    @files = @original_files.dup
   end
 
   ######################################################################

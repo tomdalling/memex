@@ -1,13 +1,16 @@
 RootContext.context Reference::CLI::Add do
-
   fs = FileSystemFake.new(
     "/in/greetings.txt" => "hello",
     "/ref/2020-12-25_001.png" => "filename taken",
   )
+  config = OpenStruct.new(
+    reference_dir: Pathname('/ref'),
+    reference_templates: []
+  )
   stdout = StringIO.new
   subject = class_under_test.new(
     file_system: fs,
-    config: Struct.new(:reference_dir).new(Pathname('/ref')),
+    config: config,
     now: ->() { Time.iso8601('2222-02-22T09:00:00+10:00') },
     stdout: stdout,
     interactive_metadata: ->(path:, noninteractive_metadata:) do
@@ -69,6 +72,38 @@ RootContext.context Reference::CLI::Add do
 
     test "includes the result of interactive metadata" do
       assert_eq(metadata.dated, Date.new(2020, 12, 25))
+    end
+  end
+
+  context 'using template' do
+    config.reference_templates << Reference::Template.new(
+      name: 'hamlet',
+      tags: %w(t1 t2),
+      notes: 'notes',
+      author: 'Shakespeare',
+    )
+
+    subject = class_under_test.new(
+      file_system: fs,
+      stdout: StringIO.new,
+      config: config,
+    )
+
+    fs.reset!
+    subject.call(
+      files: ["/in/greetings.txt"],
+      template: 'hamlet',
+      interactive: false,
+    )
+
+    metadata = Reference::Metadata.from_yaml(
+      fs.read(fs.find(/yml$/))
+    )
+
+    test 'uses the template values for metadata' do
+      assert_eq(metadata.tags, %w(t1 t2))
+      assert_eq(metadata.notes, 'notes')
+      assert_eq(metadata.author, 'Shakespeare')
     end
   end
 end

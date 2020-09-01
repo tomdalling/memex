@@ -22,6 +22,8 @@ Zeitwerk::Loader.new.tap do |loader|
   loader.inflector.inflect(
     'cli' => 'CLI',
     'uuid' => 'UUID',
+    'iso8601_time_coercer' => 'ISO8601TimeCoercer',
+    'iso8601_date_coercer' => 'ISO8601DateCoercer',
   )
   loader.push_dir(__dir__)
   loader.setup # ready!

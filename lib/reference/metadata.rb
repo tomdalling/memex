@@ -2,27 +2,11 @@ module Reference
   class Metadata
     value_semantics do
       original_filename String
-      added_at Time, coerce: true, default_generator: Time.method(:now)
+      added_at Time, coerce: ISO8601TimeCoercer, default_generator: Time.method(:now)
       tags Either(ArrayOf(String), nil), default: nil
       notes Either(String, nil), default: nil
-      dated Either(Date, nil), default: nil, coerce: true
+      dated Either(Date, nil), default: nil, coerce: ISO8601DateCoercer
       author Either(String, nil), default: nil
-    end
-
-    def self.coerce_added_at(obj)
-      if obj.is_a?(String)
-        Time.iso8601(obj)
-      else
-        obj
-      end
-    end
-
-    def self.coerce_dated(obj)
-      if obj.is_a?(String)
-        Date.iso8601(obj)
-      else
-        obj
-      end
     end
 
     def self.from_yaml(yaml)

@@ -5,6 +5,7 @@ module Reference
     option :tags, type: :array, desc: "The 'tags' metadata value"
     option :author, type: :string, desc: "The 'author' metadata value"
     option :notes, type: :string, desc: "The 'notes' metadata value"
+    option :template, type: :string, desc: "A metadata template name from the config"
     argument :files, type: :array, required: true, desc: "The files to ingest"
 
     def initialize(
@@ -25,10 +26,12 @@ module Reference
       files:,
       interactive: true,
       args: [],
+      template: nil,
       **metadata_options
     )
       files.map{ Pathname(_1) }.each do |input_path|
         metadata = metadata_for(
+          template_name: template,
           original_path: input_path,
           interactive: interactive,
           metadata_options: metadata_options,
@@ -47,19 +50,34 @@ module Reference
         @stdout.puts(...)
       end
 
-      def metadata_for(original_path:, interactive:, metadata_options:)
-        noninteractive = Metadata.new(
-          added_at: @now.(),
-          original_filename: original_path.basename.to_s,
-        ).with(metadata_options)
+      def metadata_for(original_path:, interactive:, metadata_options:, template_name:)
+        Metadata
+          .new(original_filename: original_path.basename.to_s, added_at: @now.())
+          .then { apply_template(_1, template_name) }
+          .with(metadata_options)
+          .then { apply_interactive(_1, interactive, original_path) }
 
-        if interactive
+      end
+
+      def apply_template(metadata, template_name)
+        return metadata unless template_name
+
+        template = @config.reference_templates.find { _1.name == template_name }
+        if template
+          template.apply_to(metadata)
+        else
+          fail "Template not found: #{template_name}"
+        end
+      end
+
+      def apply_interactive(metadata, is_interactive, original_path)
+        if is_interactive
           @interactive_metadata.(
             path: original_path,
-            noninteractive_metadata: noninteractive,
+            noninteractive_metadata: metadata,
           )
         else
-          noninteractive
+          metadata
         end
       end
 

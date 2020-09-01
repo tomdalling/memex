@@ -19,3 +19,21 @@ class Object
     collection.include?(self)
   end
 end
+
+#TODO: integrate upstream
+class ValueSemantics::Recipe
+  def without(*attr_names)
+    self.class.new(attributes:
+      attributes.reject { _1.name.in?(attr_names) }
+    )
+  end
+
+  def with(&block)
+    other = ValueSemantics::DSL.run(&block)
+    self.class.new(attributes: attributes + other.attributes)
+  end
+
+  def build_module
+    ValueSemantics.bake_module(self)
+  end
+end

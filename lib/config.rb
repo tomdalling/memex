@@ -16,8 +16,13 @@ class Config
   end
 
   value_semantics do
-    memex MemexConfig, coerce: MemexConfig.coercer
-    todoist Either(TodoistConfig, nil), coerce: TodoistConfig.coercer
+    memex MemexConfig,
+      coerce: MemexConfig.coercer
+    todoist Either(TodoistConfig, nil),
+      coerce: TodoistConfig.coercer
+    reference_templates ArrayOf(Reference::Template),
+      default: [],
+      coerce: ArrayCoercer(Reference::Template.coercer)
   end
 
   class << self
