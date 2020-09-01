@@ -29,6 +29,8 @@ class Config
         yml = Memex::CONFIG_PATH.read
         attrs = YAML.safe_load(yml, symbolize_names: true)
         new(attrs)
+      rescue => ex
+        fail "Failed to load #{Memex::CONFIG_PATH}: #{ex}"
       end
     end
   end
