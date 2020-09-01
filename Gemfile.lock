@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/tomdalling/value_semantics.git
+  revision: 5ea3f40f1a324332a5454115a9445c0f7f3a5b0e
+  specs:
+    value_semantics (3.5.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -17,7 +23,6 @@ GEM
     test_bench (1.2.0.0)
       test_bench-fixture (>= 1.0.0.0)
     test_bench-fixture (1.2.2.0)
-    value_semantics (3.5.0)
     vcr (6.0.0)
     zeitwerk (2.4.0)
 
@@ -32,7 +37,7 @@ DEPENDENCIES
   faraday_middleware
   io-like
   test_bench
-  value_semantics
+  value_semantics!
   vcr
   zeitwerk
 
