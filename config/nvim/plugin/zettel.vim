@@ -108,7 +108,7 @@ function! s:zettel_backlinks()
   if len(l:lines) > 0
     let l:qflist = map(l:lines, function('<SID>qf_dict_from_vimgrep_formatted_line'))
     call setqflist(l:qflist)
-    copen
+    botright copen
   else
     echom "No backlinks found"
   endif
