@@ -137,6 +137,9 @@ command! -bang -nargs=* ZettelGrep call <sid>zettel_grep(<q-args>, <bang>0)
 command! ZettelBacklinks call <sid>zettel_backlinks()
 
 nnoremap <leader>. :ZettelOpen<cr>
+nnoremap <leader>zn :ZettelNew<cr>
+vnoremap <leader>zn :ZettelNew<cr>
+nnoremap <leader>zb :ZettelBacklinks<cr>
 
 " hijack VimCompletesMe tab function to intercept with our own
 inoremap <expr> <plug>vim_completes_me_forward  <sid>complete_link()
