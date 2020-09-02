@@ -2,31 +2,56 @@ module Reference
   class InteractiveMetadata
     attr_reader :extra_metadata
 
-    def initialize(stdin: $stdin, stdout: $stdout)
+    def initialize(stdin: $stdin, stdout: $stdout, templates: Config.instance.reference_templates)
       @stdin = stdin
       @stdout = stdout
+      @templates = templates
       @extra_metadata = {}
     end
 
     def call(path:, noninteractive_metadata:)
       extra_metadata.clear
       run(path, noninteractive_metadata)
-      noninteractive_metadata.with(extra_metadata)
     end
 
     def run(path, noninteractive_metadata)
       puts "==[ #{path} ]".ljust(75, '=')
-      prompt_for_dated(noninteractive_metadata)
-      prompt_for_author(noninteractive_metadata)
-      prompt_for_notes(noninteractive_metadata)
-      prompt_for_tags(noninteractive_metadata)
+
+      defaults = prompt_for_template(noninteractive_metadata)
+      prompt_for_dated(defaults)
+      prompt_for_author(defaults)
+      prompt_for_notes(defaults)
+      prompt_for_tags(defaults)
+
+      defaults.with(extra_metadata)
     end
 
     private
 
-      def prompt_for_dated(noninteractive_metadata)
+      def prompt_for_template(noninteractive_metadata)
+        return noninteractive_metadata if @templates.empty?
+
         loop do
-          answer = prompt('Dated', noninteractive_metadata.dated) { _1.iso8601 }
+          puts
+          @templates.each_with_index do |tpl, idx|
+            puts "  #{idx}) #{tpl.name}"
+          end
+          puts
+
+          choice = prompt("Template", "no template").strip
+          return noninteractive_metadata if choice.empty?
+
+          if choice.match?(/\A\d+\z/) && Integer(choice) < @templates.size
+            return @templates[Integer(choice)].apply_to(noninteractive_metadata)
+          else
+            puts "Not a valid template choice"
+          end
+        end
+      end
+
+      def prompt_for_dated(defaults)
+        loop do
+          answer = prompt('Dated', defaults.dated) { _1.iso8601 }
           break if answer.empty?
 
           date = HumanDateParser.new.(answer)
@@ -39,18 +64,18 @@ module Reference
         end
       end
 
-      def prompt_for_author(noninteractive_metadata)
-        author = prompt('Author', noninteractive_metadata.author)
+      def prompt_for_author(defaults)
+        author = prompt('Author', defaults.author)
         extra_metadata[:author] = author unless author.empty?
       end
 
-      def prompt_for_notes(noninteractive_metadata)
-        notes = prompt('Notes', noninteractive_metadata.notes)
+      def prompt_for_notes(defaults)
+        notes = prompt('Notes', defaults.notes)
         extra_metadata[:notes] = notes unless notes.empty?
       end
 
-      def prompt_for_tags(noninteractive_metadata)
-        raw_tags = prompt("Tags", noninteractive_metadata.tags) do |tags|
+      def prompt_for_tags(defaults)
+        raw_tags = prompt("Tags", defaults.tags) do |tags|
           tags.map{ '#' + _1 }.join(' ')
         end
 
@@ -71,7 +96,12 @@ module Reference
           end
 
         print "  #{title}#{default_text}: "
-        gets.chomp
+        result = gets
+        if result
+          result.chomp
+        else
+          fail "No value provided for #{title}"
+        end
       end
 
       def puts(...)

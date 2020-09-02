@@ -6,7 +6,7 @@ module Reference
       .build_module
 
     def apply_to(metadata)
-      metadata.with(to_h.except(:name))
+      metadata.with(to_h.compact.except(:name))
     end
   end
 end
