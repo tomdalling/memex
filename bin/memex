@@ -88,7 +88,7 @@ pretty_run() {
 
   if [[ "$silent" == true ]] ; then
     # single line output
-    echoc -n "$(linetype "=") ${prefix}: ${C_CODE}$@${NOCOLOR} ... "
+    echoc -n "$(linetype "=") ${prefix}: ${C_CODE}" "$@" "${NOCOLOR} ... "
     "$@" > /dev/null
     if [[ $? == 0 ]] ; then
       echoc "${GREEN}ok"
@@ -98,7 +98,8 @@ pretty_run() {
     fi
   else
     # multi-line output
-    echoc "$(linetype ">") ${prefix}: ${C_CODE}$@${NOCOLOR}"
+    echo "$@"
+    echoc "$(linetype ">") ${prefix}: ${C_CODE}" "$@"
     if $@ ; then
       echoc "$(linetype "<") ${GREEN}ok"
     else
