@@ -1,5 +1,5 @@
 RootContext.context Reference::InteractiveMetadata do
-  transcript = TrioTranscript.new(stdin: "2222-02-22\nMe\nnotesss\n#t1 #t2\n")
+  transcript = TrioTranscript.new(stdin: "22 feb 2222\nMe\nnotesss\n#t1 #t2\n")
   subject = class_under_test.new(**transcript.duo)
 
   result = subject.(
@@ -15,7 +15,7 @@ RootContext.context Reference::InteractiveMetadata do
   test "prompts for input from stdin" do
     assert_eq(transcript.to_s, <<~END_TRANSCRIPT)
       ==[ /whatever.txt ]========================================================
-        Dated: 2222-02-22
+        Dated: 22 feb 2222
         Author (Tesla): Me
         Notes (blah blah): notesss
         Tags (#orig1 #orig2): #t1 #t2

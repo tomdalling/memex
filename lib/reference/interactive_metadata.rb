@@ -29,7 +29,7 @@ module Reference
           answer = prompt('Dated', noninteractive_metadata.dated) { _1.iso8601 }
           break if answer.empty?
 
-          date = parse_date(answer)
+          date = HumanDateParser.new.(answer)
           if date
             extra_metadata[:dated] = date
             break
@@ -37,12 +37,6 @@ module Reference
             puts "!!! Invalid date (use ISO8601 format, or leave empty)"
           end
         end
-      end
-
-      def parse_date(text)
-        Date.iso8601(text)
-      rescue Date::Error
-        nil
       end
 
       def prompt_for_author(noninteractive_metadata)
