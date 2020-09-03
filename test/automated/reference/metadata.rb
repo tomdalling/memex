@@ -1,6 +1,7 @@
 RootContext.context Reference::Metadata do
   attrs = {
     original_filename: 'original.pdf',
+    title: 'Electric Eel',
     added_at: Time.iso8601('2222-02-22T22:22:22Z'),
     tags: %w(t1 t2 t3),
     notes: 'some notes',
@@ -10,9 +11,10 @@ RootContext.context Reference::Metadata do
   yaml = {
     "original_filename" => 'original.pdf',
     "added_at" => '2222-02-22T22:22:22Z',
+    "title" => 'Electric Eel',
+    "dated" => '1111-11-11',
     "tags" => %w(t1 t2 t3),
     "notes" => 'some notes',
-    "dated" => '1111-11-11',
     "author" => 'Henry V',
   }
 

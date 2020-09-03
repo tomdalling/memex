@@ -1,5 +1,13 @@
 RootContext.context Reference::InteractiveMetadata do
-  transcript = TrioTranscript.new(stdin: "1\n22 feb 2222\n\n\n#t1 #t2\n")
+  transcript = TrioTranscript.new(stdin: <<~END_STDIN)
+    1
+    Pay Ya Bill Bud
+    22 feb 2222
+
+
+    #t1 #t2
+  END_STDIN
+
   templates = [
     Reference::Template.new(name: 'bank_statement'),
     Reference::Template.new(
@@ -28,6 +36,7 @@ RootContext.context Reference::InteractiveMetadata do
         1) water_bill
 
         Template (no template): 1
+        Title: Pay Ya Bill Bud
         Dated: 22 feb 2222
         Author (Aquaman): 
         Notes (blah blah): 
@@ -35,8 +44,12 @@ RootContext.context Reference::InteractiveMetadata do
     END_TRANSCRIPT
   end
 
-  test "includes dated in the results" do
+  test "includes `dated` in the results" do
     assert_eq(result.dated, Date.new(2222, 2, 22))
+  end
+
+  test "includes `title` in the results" do
+    assert_eq(result.title, "Pay Ya Bill Bud")
   end
 
   test "includes author in the results (from template)" do

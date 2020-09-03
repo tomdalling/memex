@@ -25,6 +25,7 @@ RootContext.context Reference::CLI::Add do
     tags: %w(a b c),
     author: 'Einstein',
     notes: 'my notes',
+    title: 'The Theory of Relativity 2, Electric Boogaloo',
   )
 
   test "generates a unique filename based on the `dated` metadata" do
@@ -68,6 +69,10 @@ RootContext.context Reference::CLI::Add do
 
     test "includes `notes`" do
       assert_eq(metadata.notes, 'my notes')
+    end
+
+    test 'includes `title`' do
+      assert_eq(metadata.title, 'The Theory of Relativity 2, Electric Boogaloo')
     end
 
     test "includes the result of interactive metadata" do

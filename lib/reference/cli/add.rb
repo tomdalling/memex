@@ -5,6 +5,7 @@ module Reference
     option :tags, type: :array, desc: "The 'tags' metadata value"
     option :author, type: :string, desc: "The 'author' metadata value"
     option :notes, type: :string, desc: "The 'notes' metadata value"
+    option :title, type: :string, dest: "The 'title' metadata value"
     option :template, type: :string, desc: "A metadata template name from the config"
     argument :files, type: :array, required: true, desc: "The files to ingest"
 

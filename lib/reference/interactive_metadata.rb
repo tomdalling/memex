@@ -18,6 +18,7 @@ module Reference
       puts "==[ #{path} ]".ljust(75, '=')
 
       defaults = prompt_for_template(noninteractive_metadata)
+      prompt_for_title(defaults)
       prompt_for_dated(defaults)
       prompt_for_author(defaults)
       prompt_for_notes(defaults)
@@ -47,6 +48,11 @@ module Reference
             puts "Not a valid template choice"
           end
         end
+      end
+
+      def prompt_for_title(defaults)
+        title = prompt('Title', defaults.title).strip
+        extra_metadata[:title] = title unless title.empty?
       end
 
       def prompt_for_dated(defaults)

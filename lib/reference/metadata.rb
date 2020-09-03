@@ -3,9 +3,10 @@ module Reference
     value_semantics do
       original_filename String
       added_at Time, coerce: ISO8601TimeCoercer, default_generator: Time.method(:now)
+      title Either(String, nil), default: nil
+      dated Either(Date, nil), default: nil, coerce: ISO8601DateCoercer
       tags Either(ArrayOf(String), nil), default: nil
       notes Either(String, nil), default: nil
-      dated Either(Date, nil), default: nil, coerce: ISO8601DateCoercer
       author Either(String, nil), default: nil
     end
 
