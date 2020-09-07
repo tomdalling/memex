@@ -19,11 +19,11 @@ module Reference
 
       prompt_for_delete_after_ingestion(noninteractive_metadata.delete_after_ingestion?)
       defaults = prompt_for_template(noninteractive_metadata)
-      prompt_for_title(defaults)
-      prompt_for_dated(defaults)
-      prompt_for_author(defaults)
-      prompt_for_notes(defaults)
-      prompt_for_tags(defaults)
+      prompt_for_title(defaults.title)
+      prompt_for_dated(defaults.dated)
+      prompt_for_author(defaults.author)
+      prompt_for_notes(defaults.notes)
+      prompt_for_tags(defaults.tags)
 
       defaults.with(extra_metadata)
     end
@@ -70,14 +70,14 @@ module Reference
         end
       end
 
-      def prompt_for_title(defaults)
-        title = prompt('Title', defaults.title).strip
+      def prompt_for_title(default_title)
+        title = prompt('Title', default_title).strip
         extra_metadata[:title] = title unless title.empty?
       end
 
-      def prompt_for_dated(defaults)
+      def prompt_for_dated(default_dated)
         loop do
-          answer = prompt('Dated', defaults.dated) { _1.iso8601 }
+          answer = prompt('Dated', default_dated, &:iso8601)
           break if answer.empty?
 
           date = HumanDateParser.new.(answer)
@@ -90,18 +90,18 @@ module Reference
         end
       end
 
-      def prompt_for_author(defaults)
-        author = prompt('Author', defaults.author)
+      def prompt_for_author(default_author)
+        author = prompt('Author', default_author)
         extra_metadata[:author] = author unless author.empty?
       end
 
-      def prompt_for_notes(defaults)
-        notes = prompt('Notes', defaults.notes)
+      def prompt_for_notes(default_note)
+        notes = prompt('Notes', default_note)
         extra_metadata[:notes] = notes unless notes.empty?
       end
 
-      def prompt_for_tags(defaults)
-        raw_tags = prompt("Tags", defaults.tags) do |tags|
+      def prompt_for_tags(default_tags)
+        raw_tags = prompt("Tags", default_tags) do |tags|
           tags.map{ '#' + _1 }.join(' ')
         end
 

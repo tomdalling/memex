@@ -63,7 +63,6 @@ module Reference
           .then { apply_template(_1, template_name) }
           .with(metadata_options)
           .then { apply_interactive(_1, interactive, original_path) }
-
       end
 
       def apply_template(metadata, template_name)
