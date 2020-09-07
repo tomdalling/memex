@@ -17,6 +17,7 @@ module Reference
     def run(path, noninteractive_metadata)
       puts "==[ #{path} ]".ljust(75, '=')
 
+      prompt_for_delete_after_ingestion(noninteractive_metadata.delete_after_ingestion?)
       defaults = prompt_for_template(noninteractive_metadata)
       prompt_for_title(defaults)
       prompt_for_dated(defaults)
@@ -28,6 +29,25 @@ module Reference
     end
 
     private
+
+      def prompt_for_delete_after_ingestion(default)
+        loop do
+          answer = prompt('Delete after ingestion? yes/no', default ? 'yes' : 'no')
+          case answer.strip.downcase
+          when 'yes', 'y'
+            extra_metadata[:delete_after_ingestion?] = true
+            break
+          when 'no', 'n'
+            extra_metadata[:delete_after_ingestion?] = false
+            break
+          when ''
+            # don't change anything (use default)
+            break
+          else
+            puts "What?"
+          end
+        end
+      end
 
       def prompt_for_template(noninteractive_metadata)
         return noninteractive_metadata if @templates.empty?

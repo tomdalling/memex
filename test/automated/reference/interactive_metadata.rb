@@ -1,5 +1,6 @@
 RootContext.context Reference::InteractiveMetadata do
   transcript = TrioTranscript.new(stdin: <<~END_STDIN)
+    y
     1
     Pay Ya Bill Bud
     22 feb 2222
@@ -31,6 +32,7 @@ RootContext.context Reference::InteractiveMetadata do
   test "prompts for input from stdin" do
     assert_eq(transcript.to_s, <<~END_TRANSCRIPT)
       ==[ /whatever.txt ]========================================================
+        Delete after ingestion? yes/no (no): y
 
         0) bank_statement
         1) water_bill
@@ -62,5 +64,9 @@ RootContext.context Reference::InteractiveMetadata do
 
   test "includes tags in the result (from user input)" do
     assert_eq(result.tags, %w(t1 t2))
+  end
+
+  test "includes `delete_after_ingestion?` in the results" do
+    assert_predicate(result, :delete_after_ingestion?)
   end
 end

@@ -37,8 +37,14 @@ module Reference
           interactive: interactive,
           metadata_options: metadata_options,
         )
+
         ref_path = add_document(input_path, metadata)
         puts ">>> Ingested \"#{ref_path}\" from \"#{input_path}\""
+
+        if metadata.delete_after_ingestion?
+          @file_system.delete(input_path)
+          puts "--- Deleted \"#{input_path}\""
+        end
       end
     end
 

@@ -16,6 +16,7 @@ RootContext.context Reference::CLI::Add do
     interactive_metadata: ->(path:, noninteractive_metadata:) do
       noninteractive_metadata.with(
         dated: Date.new(2020, 12, 25),
+        delete_after_ingestion?: true,
       )
     end
   )
@@ -43,7 +44,12 @@ RootContext.context Reference::CLI::Add do
   test "outputs stuff" do
     assert_eq(stdout.string, <<~END_OUTPUT)
       >>> Ingested "/ref/2020-12-25_002.txt" from "/in/greetings.txt"
+      --- Deleted "/in/greetings.txt"
     END_OUTPUT
+  end
+
+  test 'deletes the original file (if told to)' do
+    refute(fs.exists?('/in/greetings.txt'))
   end
 
   context 'metadata' do

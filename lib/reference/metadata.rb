@@ -8,6 +8,7 @@ module Reference
       tags Either(ArrayOf(String), nil), default: nil
       notes Either(String, nil), default: nil
       author Either(String, nil), default: nil
+      delete_after_ingestion? Bool(), default: false
     end
 
     def self.from_yaml(yaml)
@@ -15,7 +16,11 @@ module Reference
     end
 
     def to_yaml
-      YAML.dump(deep_yamlify(to_h.compact))
+      to_h
+        .except(:delete_after_ingestion?)
+        .compact
+        .then { deep_yamlify(_1) }
+        .then { YAML.dump(_1) }
     end
 
     private
