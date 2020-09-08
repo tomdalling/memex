@@ -75,11 +75,15 @@ module Reference
       end
 
       def prompt_for_author(default_author)
-        extra_metadata[:author] = @prompt.ask('Author:', value: default_author)
+        extra_metadata[:author] = @prompt.ask('Author:') do
+          _1.value(default_author) if default_author
+        end
       end
 
       def prompt_for_notes(default_note)
-        extra_metadata[:notes] = @prompt.ask('Notes:', value: default_note)
+        extra_metadata[:notes] = @prompt.ask('Notes:') do
+          _1.value(default_note) if default_note
+        end
       end
 
       def prompt_for_tags(default_tags)
