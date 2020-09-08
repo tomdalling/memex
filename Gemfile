@@ -8,6 +8,7 @@ gem 'faraday'
 gem 'faraday_middleware'
 gem 'zeitwerk'
 gem 'io-like'
+gem 'tty-prompt'
 
 # testing
 gem 'test_bench'

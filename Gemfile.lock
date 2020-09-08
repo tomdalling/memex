@@ -19,11 +19,24 @@ GEM
       faraday (~> 1.0)
     io-like (0.3.1)
     multipart-post (2.1.1)
+    pastel (0.8.0)
+      tty-color (~> 0.5)
     public_suffix (4.0.5)
     test_bench (1.2.0.0)
       test_bench-fixture (>= 1.0.0.0)
     test_bench-fixture (1.2.2.0)
+    tty-color (0.5.2)
+    tty-cursor (0.7.1)
+    tty-prompt (0.22.0)
+      pastel (~> 0.8)
+      tty-reader (~> 0.8)
+    tty-reader (0.8.0)
+      tty-cursor (~> 0.7)
+      tty-screen (~> 0.8)
+      wisper (~> 2.0)
+    tty-screen (0.8.1)
     vcr (6.0.0)
+    wisper (2.0.1)
     zeitwerk (2.4.0)
 
 PLATFORMS
@@ -37,6 +50,7 @@ DEPENDENCIES
   faraday_middleware
   io-like
   test_bench
+  tty-prompt
   value_semantics!
   vcr
   zeitwerk

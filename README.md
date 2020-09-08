@@ -72,4 +72,13 @@ Tests
 
 Use `bin/test` as a stand-in for the `bench` command. In test.vim:
 
-    let test#ruby#testbench#executable = 'bin/test'
+
+```vim
+let test#ruby#testbench#executable = 'bin/test'
+```
+
+Mapping for manual tests:
+
+```vim
+nnoremap <leader>tm :tabnew term://bundle exec ruby test/manual/reference/interactive_metadata.rb<cr>
+```

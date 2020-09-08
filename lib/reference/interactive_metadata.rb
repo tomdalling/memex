@@ -7,6 +7,7 @@ module Reference
       @stdout = stdout
       @templates = templates
       @extra_metadata = {}
+      @prompt = TTY::Prompt.new(input: stdin, output: stdout)
     end
 
     def call(path:, noninteractive_metadata:)
@@ -15,7 +16,7 @@ module Reference
     end
 
     def run(path, noninteractive_metadata)
-      puts "==[ #{path} ]".ljust(75, '=')
+      @stdout.puts "==[ #{path} ]".ljust(75, '=')
 
       prompt_for_delete_after_ingestion(noninteractive_metadata.delete_after_ingestion?)
       defaults = prompt_for_template(noninteractive_metadata)
@@ -31,115 +32,61 @@ module Reference
     private
 
       def prompt_for_delete_after_ingestion(default)
-        loop do
-          answer = prompt('Delete after ingestion? yes/no', default ? 'yes' : 'no')
-          case answer.strip.downcase
-          when 'yes', 'y'
-            extra_metadata[:delete_after_ingestion?] = true
-            break
-          when 'no', 'n'
-            extra_metadata[:delete_after_ingestion?] = false
-            break
-          when ''
-            # don't change anything (use default)
-            break
-          else
-            puts "What?"
-          end
-        end
+        answer = @prompt.yes?("Delete after ingestion?", default: default)
+        extra_metadata[:delete_after_ingestion?] = answer
+        nil
       end
 
       def prompt_for_template(noninteractive_metadata)
         return noninteractive_metadata if @templates.empty?
 
-        loop do
-          puts
-          @templates.each_with_index do |tpl, idx|
-            puts "  #{idx}) #{tpl.name}"
-          end
-          puts
+        answer = @prompt.select("Template:") do |menu|
+          menu.choice('None', false)
+          @templates.each_with_index { menu.choice(_1.name, _2) }
+        end
 
-          choice = prompt("Template", "no template").strip
-          return noninteractive_metadata if choice.empty?
-
-          if choice.match?(/\A\d+\z/) && Integer(choice) < @templates.size
-            return @templates[Integer(choice)].apply_to(noninteractive_metadata)
-          else
-            puts "Not a valid template choice"
-          end
+        if answer
+          @templates[answer].apply_to(noninteractive_metadata)
+        else
+          noninteractive_metadata
         end
       end
 
       def prompt_for_title(default_title)
-        title = prompt('Title', default_title).strip
-        extra_metadata[:title] = title unless title.empty?
+        extra_metadata[:title] = @prompt.ask('Title:') do
+          _1.value(default_title)
+          _1.modify(:strip)
+        end
       end
 
       def prompt_for_dated(default_dated)
-        loop do
-          answer = prompt('Dated', default_dated, &:iso8601)
-          break if answer.empty?
-
-          date = HumanDateParser.new.(answer)
-          if date
-            extra_metadata[:dated] = date
-            break
-          else
-            puts "!!! Invalid date (use ISO8601 format, or leave empty)"
-          end
+        answer = @prompt.ask('Dated:') do |q|
+          q.required(true)
+          q.value(default_dated&.iso8601)
+          q.validate { _1.empty? || HumanDateParser.new.(_1) }
         end
+
+        extra_metadata[:dated] =
+          if answer
+            HumanDateParser.new.(answer)
+          else
+            nil
+          end
       end
 
       def prompt_for_author(default_author)
-        author = prompt('Author', default_author)
-        extra_metadata[:author] = author unless author.empty?
+        extra_metadata[:author] = @prompt.ask('Author:', value: default_author)
       end
 
       def prompt_for_notes(default_note)
-        notes = prompt('Notes', default_note)
-        extra_metadata[:notes] = notes unless notes.empty?
+        extra_metadata[:notes] = @prompt.ask('Notes:', value: default_note)
       end
 
       def prompt_for_tags(default_tags)
-        raw_tags = prompt("Tags", default_tags) do |tags|
-          tags.map{ '#' + _1 }.join(' ')
-        end
-
-        tags = raw_tags.strip.split.map { _1.delete_prefix('#') }.reject(&:empty?)
-        if tags.any?
-          extra_metadata[:tags] = tags
-        end
-      end
-
-      def prompt(title, default_value)
-        default_text =
-          if default_value.nil?
-            ''
-          elsif block_given?
-            " (#{yield(default_value)})"
-          else
-            " (#{default_value})"
-          end
-
-        print "  #{title}#{default_text}: "
-        result = gets
-        if result
-          result.chomp
-        else
-          fail "No value provided for #{title}"
-        end
-      end
-
-      def puts(...)
-        @stdout.puts(...)
-      end
-
-      def print(...)
-        @stdout.print(...)
-      end
-
-      def gets(...)
-        @stdin.gets(...)
+        str_defaults = (default_tags || []).map{ '#' + _1 }.join(' ')
+        raw_tags = @prompt.ask("Tags:", value: str_defaults)
+        tags = (raw_tags || "").strip.split.map { _1.delete_prefix('#') }.reject(&:empty?)
+        extra_metadata[:tags] = tags if tags.any?
       end
   end
 end
