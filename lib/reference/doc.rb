@@ -12,5 +12,8 @@ module Reference
         Metadata.from_yaml(path.read)
       end
     end
+
+    extend Forwardable
+    def_delegators :metadata, *%i(original_filename title tags)
   end
 end

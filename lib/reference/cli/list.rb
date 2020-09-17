@@ -12,11 +12,12 @@ module Reference
     private
 
       def output_line(doc)
-        title = doc.metadata.title || '<no title>'
-        original_filename = doc.metadata.original_filename
+        title = doc.title || '<no title>'
+        original_filename = doc.original_filename
           .then { _1 ? "(#{_1})" : '' }
+        tags = doc.tags.map{ '#' + _1 }.join(' ')
 
-        "#{doc.id} #{title} #{original_filename}"
+        "#{doc.id} #{title} #{original_filename} #{tags}"
       end
 
       def match?(doc, search_str)
