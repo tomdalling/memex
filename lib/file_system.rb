@@ -6,6 +6,10 @@ module FileSystem
     def copy(src_path, dest_path); end
     def children_of(directory_path); end
     def delete(path); end
+    # from Nodoor::FileSystem
+    def each_file_under(directory, &block); end
+    def open(path, &block); end
+    def exist?(path); end
   end
 
   self_implements Interface
@@ -33,5 +37,17 @@ module FileSystem
 
   def delete(path)
     File.unlink(path)
+  end
+
+  def each_file_under(directory_path, &block)
+    Nodoor::FileSystem.each_file_under(directory_path, &block)
+  end
+
+  def open(path, &block)
+    File.open(path.to_s, &block)
+  end
+
+  def exist?(path)
+    exists?(path)
   end
 end

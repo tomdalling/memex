@@ -5,18 +5,31 @@ module Reference
     extend Forwardable
     def_delegators :metadata, *%i(original_filename title tags)
 
-    def initialize(id)
+    # TODO: this is a temporary shim while migrating to Nodoor
+    def self.for_nodoor_record(nodoor_record)
+      new(nodoor_record.path.sub_ext(''), nodoor_record: nodoor_record)
+    end
+
+    def initialize(id, nodoor_record: nil)
       @id = id
+      @nodoor_record = nodoor_record
     end
 
     def metadata
       @metadata ||= begin
-        Metadata.from_yaml(metadata_path.read)
+        if nodoor_record
+          Metadata.from_hash(nodoor_record.metadata)
+        else
+          Metadata.from_yaml(metadata_path.read)
+        end
       end
+    rescue ValueSemantics::MissingAttributes
+      pp self
+      raise
     end
 
     def metadata_path
-      base_path.sub_ext('.metadata.yml')
+      base_path.sub_ext(path.extname + '.nodoor_metadata.yml')
     end
 
     def path
@@ -28,6 +41,8 @@ module Reference
     end
 
     private
+
+      attr_reader :nodoor_record
 
       def base_path
         Config.instance.reference_dir / id

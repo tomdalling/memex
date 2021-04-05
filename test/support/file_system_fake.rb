@@ -48,6 +48,25 @@ class FileSystemFake
   end
 
   ######################################################################
+  # implements Nodoor::FileSystem
+
+  def each_file_under(directory, &block)
+    @files
+      .keys
+      .select { _1.start_with?(directory.to_s) }
+      .each(&block)
+  end
+
+  def open(path, &block)
+    f = StringIO.new(read(path))
+    block.call(f)
+  end
+
+  def exist?(path)
+    exists?(path)
+  end
+
+  ######################################################################
   private
 
     def to_path(obj)

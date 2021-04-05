@@ -11,6 +11,11 @@ module Reference
       delete_after_ingestion? Bool(), default: false
     end
 
+    def self.from_hash(attr_hash)
+      # TODO: this could be way more efficient
+      from_yaml(YAML.dump(attr_hash))
+    end
+
     def self.from_yaml(yaml)
       new(YAML.safe_load(yaml, symbolize_names: true))
     end

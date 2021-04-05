@@ -3,13 +3,28 @@ module Reference
     desc "Lists/searches through reference docs"
     option :grep, desc: "String to search for (not a pattern, yet)"
 
+    def initialize(file_system: FileSystem, config: Config.instance, stdout: $stdout)
+      @file_system = file_system
+      @config = config
+      @stdout = stdout
+    end
+
     def call(grep: nil)
-      Reference.each do |doc|
-        puts output_line(doc) if match?(doc, grep)
+      reference_repo.each do |record|
+        doc = Doc.for_nodoor_record(record)
+        stdout.puts output_line(doc) if match?(doc, grep)
       end
     end
 
     private
+      include Memery
+
+      attr_reader :file_system, :config, :stdout
+
+      memoize \
+      def reference_repo
+        ::Nodoor::Repo.new(config.reference_dir, file_system: file_system)
+      end
 
       def output_line(doc)
         title = doc.title || '<no title>'
