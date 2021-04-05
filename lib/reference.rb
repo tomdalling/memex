@@ -2,8 +2,9 @@ module Reference
   # TODO: extract these into a repo object
   def self.each(&block)
     if block
-      Config.instance.reference_dir.glob('*.metadata.yml') do |metadata_path|
-        doc_id = metadata_path.basename.to_s.delete_suffix('.metadata.yml')
+      # TODO: This should be moved to a proper repository layer.
+      Config.instance.reference_dir.glob('*' + Nodoor::Repo::SIDECAR_METADATA_EXT) do |metadata_path|
+        doc_id = File.basename(metadata_path.delete_suffix(Nodoor::Repo::SIDECAR_METADATA_EXT), '.*')
         block.(Doc.new(doc_id))
       end
     else

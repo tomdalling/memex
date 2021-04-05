@@ -1,8 +1,8 @@
 RootContext.context Reference::CLI::Remove do
   fs = FileSystemFake.new(
     "/ref/thing.pdf" => "hello",
+    "/ref/thing.pdf.nodoor_metadata.yml" => "hello",
     "/ref/thing.fulltext.txt" => "hello",
-    "/ref/thing.metadata.yml" => "hello",
   )
 
   subject = class_under_test.new(
@@ -22,6 +22,6 @@ RootContext.context Reference::CLI::Remove do
   end
 
   test "deletes the metadata" do
-    refute(fs.exists?("/ref/thing.metadata.yml"))
+    refute(fs.exists?("/ref/thing.pdf.nodoor_metadata.yml"))
   end
 end

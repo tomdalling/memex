@@ -38,7 +38,7 @@ RootContext.context Reference::CLI::Add do
   end
 
   test "writes metadata into a separate file" do
-    assert(fs.exists?('/ref/2020-12-25_002.metadata.yml'))
+    assert(fs.exists?('/ref/2020-12-25_002.txt.nodoor_metadata.yml'))
   end
 
   test "outputs stuff" do
@@ -54,7 +54,7 @@ RootContext.context Reference::CLI::Add do
 
   context 'metadata' do
     metadata = Reference::Metadata.from_yaml(
-      fs.read('/ref/2020-12-25_002.metadata.yml'),
+      fs.read('/ref/2020-12-25_002.txt.nodoor_metadata.yml'),
     )
 
     test "includes `added_at`" do

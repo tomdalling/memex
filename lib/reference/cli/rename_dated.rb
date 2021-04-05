@@ -4,7 +4,9 @@ module Reference
     option :dry_run, type: :boolean, default: true, desc: "Don't actually rename, just output"
 
     def call(dry_run:)
-      Config.instance.reference_dir.glob('*.metadata.yml').sort.each do
+      # TODO: this is too low-level. Metadata reading/writing should be
+      # encapsulated at the repository level
+      Config.instance.reference_dir.glob('*' + Nodoor::Repo::SIDECAR_METADATA_EXT).sort.each do
         rename(_1, dry_run: dry_run)
       end
 

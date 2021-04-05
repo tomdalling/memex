@@ -29,7 +29,9 @@ module Reference
     end
 
     def metadata_path
-      base_path.sub_ext(path.extname + '.nodoor_metadata.yml')
+      # TODO: this is too low-level. Metadata reading/writing should be
+      # encapsulated at the repository level
+      base_path.sub_ext(path.extname + Nodoor::Repo::SIDECAR_METADATA_EXT)
     end
 
     def path

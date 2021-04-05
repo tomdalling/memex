@@ -104,7 +104,10 @@ module Reference
       end
 
       def write_metadata(ref_path, metadata)
-        @file_system.write(ref_path.sub_ext('.metadata.yml'), metadata.to_yaml)
+        # TODO: this is too low-level. Metadata reading/writing should be
+        # encapsulated at the repository level
+        metadata_path = ref_path.to_s + Nodoor::Repo::SIDECAR_METADATA_EXT
+        @file_system.write(metadata_path, metadata.to_yaml)
       end
   end
 end
