@@ -7,10 +7,11 @@ module Reference
 
     # TODO: this is a temporary shim while migrating to Nodoor
     def self.for_nodoor_record(nodoor_record)
-      new(nodoor_record.path.sub_ext(''), nodoor_record: nodoor_record)
+      new(nodoor_record.path.sub_ext('').to_s, nodoor_record: nodoor_record)
     end
 
     def initialize(id, nodoor_record: nil)
+      raise ArgumentError unless id.is_a?(String)
       @id = id
       @nodoor_record = nodoor_record
     end
