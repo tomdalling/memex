@@ -15,8 +15,16 @@ RootContext.context DiffParser do
        {
       +       const char *prefix;
               struct walker *walker;
+      diff --git a/ref/2010-06-30_001.zip.nodoor_metadata.yml b/ref/2010-06-30_001.nodoor_metadata.yml
+      similarity index 100%
+      rename from ref/2010-06-30_001.zip.nodoor_metadata.yml
+      rename to ref/2010-06-30_001.nodoor_metadata.yml
       diff --git a/whatever.png b/whatever.png
       Binary files a/whatever.png and b/whatever.png differ
+      diff --git a/ref/2011-06-30_001.zip.nodoor_metadata.yml b/ref/2011-06-30_001.nodoor_metadata.yml
+      similarity index 100%
+      rename from ref/2011-06-30_001.zip.nodoor_metadata.yml
+      rename to ref/2011-06-30_001.nodoor_metadata.yml
     END_DIFF
 
     expected = [
@@ -50,11 +58,31 @@ RootContext.context DiffParser do
         ]
       ),
       DiffParser::File.new(
+        headers: [
+          'similarity index 100%',
+          'rename from ref/2010-06-30_001.zip.nodoor_metadata.yml',
+          'rename to ref/2010-06-30_001.nodoor_metadata.yml',
+        ],
+        source: 'a/ref/2010-06-30_001.zip.nodoor_metadata.yml',
+        destination: 'b/ref/2010-06-30_001.nodoor_metadata.yml',
+        hunks: [],
+      ),
+      DiffParser::File.new(
         headers: [],
         source: 'a/whatever.png',
         destination: 'b/whatever.png',
         hunks: [],
-      )
+      ),
+      DiffParser::File.new(
+        headers: [
+          'similarity index 100%',
+          'rename from ref/2011-06-30_001.zip.nodoor_metadata.yml',
+          'rename to ref/2011-06-30_001.nodoor_metadata.yml',
+        ],
+        source: 'a/ref/2011-06-30_001.zip.nodoor_metadata.yml',
+        destination: 'b/ref/2011-06-30_001.nodoor_metadata.yml',
+        hunks: [],
+      ),
     ]
 
     assert_eq(actual, expected)

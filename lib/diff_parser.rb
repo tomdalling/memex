@@ -30,6 +30,8 @@ class DiffParser
 
       if @scanner.match?(BINARY_DIFF_PREFIX)
         read_line
+      elsif @scanner.match?(FILE_START_PREFIX) || @scanner.eos?
+        # there are no hunks
       else
         src = read_source
         dst = read_dest
@@ -59,6 +61,7 @@ class DiffParser
         loop do
           break if @scanner.match?(SOURCE_LINE_PREFIX)
           break if @scanner.match?(BINARY_DIFF_PREFIX)
+          break if @scanner.match?(FILE_START_PREFIX)
           break if @scanner.eos?
           lines << read_line
         end
