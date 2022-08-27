@@ -7,7 +7,7 @@ module Reference
 
     # TODO: this is a temporary shim while migrating to Nodoor
     def self.for_nodoor_record(nodoor_record)
-      new(nodoor_record.path.sub_ext('').to_s, nodoor_record: nodoor_record)
+      new(nodoor_record.path.to_s, nodoor_record: nodoor_record)
     end
 
     def initialize(id, nodoor_record: nil)
@@ -29,14 +29,14 @@ module Reference
       raise
     end
 
+    def path
+      Config.instance.reference_dir / id
+    end
+
     def metadata_path
       # TODO: this is too low-level. Metadata reading/writing should be
       # encapsulated at the repository level
-      base_path.sub_ext(path.extname + Nodoor::Repo::SIDECAR_METADATA_EXT)
-    end
-
-    def path
-      base_path.sub_ext(File.extname(original_filename))
+      path.sub_ext(path.extname + Nodoor::Repo::SIDECAR_METADATA_EXT)
     end
 
     def exists?
@@ -46,9 +46,5 @@ module Reference
     private
 
       attr_reader :nodoor_record
-
-      def base_path
-        Config.instance.reference_dir / id
-      end
   end
 end

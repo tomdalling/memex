@@ -21,6 +21,6 @@ RootContext.context Reference::CLI::List do
   detail "OUTPUT:\n#{stdout.string}"
 
   test "outputs all documents" do
-    assert(stdout.string.strip == "camelot King Arthur (round_table.txt)")
+    assert(stdout.string.strip == "camelot.txt King Arthur (round_table.txt)")
   end
 end
