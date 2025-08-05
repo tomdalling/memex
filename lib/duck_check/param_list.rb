@@ -15,8 +15,10 @@ module DuckCheck
     end
 
     def allow_anything?
-      # these two params are how Ruby represents (...) args
-      @params == [Param.rest(:*), Param.block(:&)]
+      # these three params are how Ruby represents (...) args
+      # TODO: since which version of Ruby? The keyrest middle bit didn't used to
+      # exist at the time this was first written.
+      @params == [Param.rest(:*), Param.keyrest(:**), Param.block(:&)]
     end
 
     def dup
