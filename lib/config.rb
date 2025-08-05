@@ -1,13 +1,4 @@
 class Config
-  class TodoistConfig
-    value_semantics do
-      api_token String
-      master_checklists_project String
-      active_checklists_project String
-      checklist_trigger_label String
-    end
-  end
-
   class MemexConfig
     value_semantics do
       image_path Pathname, coerce: Pathname.method(:new)
@@ -18,8 +9,6 @@ class Config
   value_semantics do
     memex MemexConfig,
       coerce: MemexConfig.coercer
-    todoist Either(TodoistConfig, nil),
-      coerce: TodoistConfig.coercer
     reference_templates ArrayOf(Reference::Template),
       default: [],
       coerce: ArrayCoercer(Reference::Template.coercer)
@@ -27,7 +16,7 @@ class Config
 
   class << self
     extend Forwardable
-    def_delegators :instance, *%i(memex todoist)
+    def_delegators :instance, *%i(memex)
 
     def instance
       @instance ||= begin

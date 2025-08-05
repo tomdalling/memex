@@ -54,11 +54,6 @@ TODO: References
    format
  - a way to store digitised paper documents?
 
-TODO: Todo
-----------
-
- - A replacement for Todoist, maybe. This is turning into Org mode, man.
-
 Memex
 -----
 
