@@ -9,6 +9,7 @@ require 'yaml'
 require 'securerandom'
 require 'pp'
 require 'pathname'
+require 'ostruct'
 
 ENV['BUNDLE_GEMFILE'] ||= Pathname(__dir__).parent.join('Gemfile').to_path
 
