@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 # not testing
+gem 'base64'
 gem 'dry-cli'
 gem 'addressable'
 gem 'value_semantics', github: 'tomdalling/value_semantics'
