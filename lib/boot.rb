@@ -10,6 +10,7 @@ require 'securerandom'
 require 'pp'
 require 'pathname'
 require 'ostruct'
+require 'time'
 
 ENV['BUNDLE_GEMFILE'] ||= Pathname(__dir__).parent.join('Gemfile').to_path
 
