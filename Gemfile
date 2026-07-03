@@ -1,6 +1,5 @@
 source 'https://rubygems.org'
 
-# not testing
 gem 'base64'
 gem 'dry-cli'
 gem 'addressable'
@@ -13,8 +12,9 @@ gem 'zeitwerk'
 gem 'io-like'
 gem 'tty-prompt'
 gem 'memery'
-
-# testing
-gem 'test_bench'
 gem 'byebug'
-gem 'vcr'
+
+group :test do
+  gem 'test_bench'
+  gem 'vcr'
+end
