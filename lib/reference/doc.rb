@@ -3,7 +3,7 @@ module Reference
     attr_reader :id
 
     extend Forwardable
-    def_delegators :metadata, *%i(original_filename title tags)
+    def_delegators :metadata, *%i(original_filename title)
 
     # TODO: this is a temporary shim while migrating to Nodoor
     def self.for_nodoor_record(nodoor_record)
@@ -15,6 +15,8 @@ module Reference
       @id = id
       @nodoor_record = nodoor_record
     end
+
+    def tags = metadata.tags || []
 
     def metadata
       @metadata ||= begin
